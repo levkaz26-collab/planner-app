@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Заказы">
+<meta name="robots" content="noindex">
+<title>Планировщик заказов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#14171f;--mut:#6b7280;--line:#e5e7eb;--blue:#2f5bea;--blue2:#e9eefd;--green:#1f9d62;--green2:#e6f6ee;--red:#d94141;--red2:#fdeaea;--amb:#d98a1b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;font-variant-numeric:tabular-nums;overscroll-behavior:none;overflow-wrap:anywhere}
+#app{max-width:500px;margin:0 auto;height:100%;position:relative;display:flex;flex-direction:column}
+#main{flex:1;overflow-y:auto;padding:18px 16px 120px}
+button{font-family:inherit;color:inherit}
+h1{font-size:28px;font-weight:600;letter-spacing:-.4px;line-height:1.1}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.top .r{display:flex;align-items:center;gap:4px;flex:none}
+.txt{border:0;background:none;color:var(--blue);font-size:15px;font-weight:500;padding:6px 2px}
+.ib{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:none}
+.ib svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:flex;background:#e9ebef;border-radius:10px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;padding:8px 0;border-radius:8px;font-size:14px;font-weight:500;color:var(--mut)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(20,23,31,.12)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.nav b{font-size:17px;font-weight:600;text-align:center}
+.nav button{border:1px solid var(--line);background:#fff;width:36px;height:36px;border-radius:10px;font-size:18px;color:var(--ink);flex:none}
+.sum{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;gap:10px 14px;flex-wrap:wrap}
+.sum>div{flex:1;min-width:120px}
+.sum small{display:block;font-size:12px;color:var(--mut);margin-bottom:2px}
+.sum b{font-size:19px;font-weight:600;white-space:nowrap}
+.sum .r{color:var(--red)}
+.sum .bar{flex-basis:100%;height:4px;border-radius:4px;background:#eceef2;overflow:hidden;min-width:100%}
+.sum .bar i{display:block;height:100%;background:var(--green)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.colh{display:flex;justify-content:flex-end;padding:8px 6px 0 14px;font-size:11px;color:var(--mut)}
+.colh span{width:50px;text-align:center}
+.row{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;min-height:60px;cursor:pointer}
+.row+.row{border-top:1px solid var(--line)}
+.row .t{flex:1;min-width:0}
+.row .n{font-size:16px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:13px;color:var(--mut);margin-top:2px;line-height:1.3}
+.row .s.od{color:var(--red);font-weight:500}
+.row .a{font-size:16px;font-weight:500;white-space:nowrap;flex:none}
+.ck{width:50px;height:50px;border:0;background:none;display:flex;align-items:center;justify-content:center;flex:none}
+.ck i{width:26px;height:26px;border:1.6px solid #c4c9d2;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+.ck svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.ck.on i{background:var(--green);border-color:var(--green)}.ck.on svg{opacity:1}
+.ck.bad i{border-color:var(--red);background:var(--red2)}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px}
+.dh b{font-size:15px;font-weight:600}.dh b small{font-size:13px;font-weight:400;color:var(--mut);margin-left:6px}
+.dh.today b{color:var(--blue)}
+.add{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;flex:none}
+.add svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;stroke-linecap:round;fill:none}
+.empty{font-size:14px;color:var(--mut);padding:2px 2px 8px;line-height:1.4}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px}
+.cal .h{font-size:12px;color:var(--mut);text-align:center;padding:4px 0}
+.cal button{height:50px;border:0;background:none;border-radius:10px;font-size:15px;font-weight:500;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.cal button.out{color:#b5bac4}
+.cal button.td span{box-shadow:inset 0 0 0 1.5px var(--blue)}
+.cal button span{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.cal button.sel span{background:var(--blue);color:#fff;box-shadow:none}
+.cal .dots{display:flex;gap:3px;height:5px}
+.cal .dots u{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.cal .dots u.a{background:var(--amb)}.cal .dots u.r{background:var(--red)}
+.tabs{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:6px 12px calc(8px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px}
+.tabs nav{flex:1;display:flex}
+.tabs nav button{flex:1;border:0;background:none;color:var(--mut);font-size:11px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0}
+.tabs nav button.on{color:var(--blue)}
+.tabs svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fab{width:50px;height:50px;border-radius:14px;border:0;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.fab svg{width:24px;height:24px;stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round}
+.sh{position:fixed;inset:0;background:rgba(20,23,31,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.sh.on{display:flex}
+.sh>div{width:100%;max-width:500px;max-height:93%;overflow-y:auto;background:#fff;border-radius:18px 18px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom))}
+.sh h2{font-size:21px;font-weight:600;margin-bottom:4px}
+label{display:block;font-size:12px;color:var(--mut);font-weight:500;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.4px;line-height:1.3}
+input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink);outline:0;min-width:0}
+input:focus,select:focus{border-color:var(--blue)}
+.two{display:flex;gap:10px}.two>*{flex:1;min-width:0}
+.hint{font-size:13px;color:var(--mut);margin-top:6px;line-height:1.4}
+.btn{display:block;width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--blue);color:#fff;font-size:16px;font-weight:600}
+.btn.sec{background:var(--blue2);color:var(--blue);margin-top:8px}
+.btn.del{background:var(--red2);color:var(--red);margin-top:8px}
+.file{display:flex;align-items:center;gap:10px;border:1px dashed #b8bfcc;border-radius:10px;padding:12px;color:var(--blue);font-size:15px;font-weight:500;text-transform:none;letter-spacing:0;margin:0}
+.file input{display:none}.file svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fv{max-width:100%;max-height:200px;border-radius:10px;margin-top:8px;border:1px solid var(--line);display:block}
+.tg{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:16px}
+.tg .ck{width:44px;height:36px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.acts a,.acts button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:500;color:var(--blue);text-decoration:none;white-space:nowrap}
+.acts .off{color:#a5abb7;border-style:dashed}
+.sup{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer}
+.sup .nm{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sup .nm b{font-size:17px;font-weight:600}
+.sup .ph{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.sup .ph span{font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.chips span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:7px 8px 7px 12px;font-size:14px}
+.chips button{border:0;background:none;color:var(--mut);font-size:16px;margin-left:4px}
+.hero{background:var(--blue);color:#fff;border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.hero small{font-size:13px;opacity:.85}.hero b{display:block;font-size:30px;font-weight:600;margin-top:2px;letter-spacing:-.5px}
+.hero .od{margin-top:8px;font-size:14px;background:rgba(255,255,255,.18);display:inline-block;padding:4px 10px;border-radius:8px}
+.gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:18px 2px 8px;font-size:15px;font-weight:600}
+.gh.od{color:var(--red)}
+.gh span:last-child{white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h3{font-size:16px;font-weight:600;margin-bottom:4px}
+.card .hint:first-of-type{margin-top:0}
+.rem{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.rem button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:500;color:var(--mut)}
+.rem button.on{background:var(--blue2);border-color:var(--blue2);color:var(--blue)}
+.swr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+.swr span{font-size:15px;line-height:1.35}
+.sw{width:46px;height:28px;border-radius:14px;border:0;background:#cdd2db;position:relative;flex:none;transition:background .15s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.on{background:var(--green)}.sw.on::after{left:21px}
+.prev{background:#fbfbfd;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:14px;line-height:1.5;white-space:pre-line}
+.prev b{font-weight:600}
+.rl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.rl:first-of-type{border-top:0}
+.rl small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.cap{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin:22px 2px 8px;font-weight:500}
+.dlg{position:fixed;inset:0;background:rgba(20,23,31,.5);display:none;align-items:center;justify-content:center;z-index:90;padding:24px}
+.dlg.on{display:flex}
+.dlg>div{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:340px}
+.dlg h3{font-size:18px;font-weight:600;margin-bottom:6px}
+.dlg p{font-size:15px;color:var(--mut);line-height:1.4}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:10px;font-size:14px;z-index:95;display:none;max-width:90%;text-align:center}
+.load{padding:40px 0;text-align:center;color:var(--mut)}
+</style></head>
+<body>
+<div id="app">
+  <div id="main"><div class="load">Загрузка…</div></div>
+  <div class="tabs">
+    <nav id="nav"></nav>
+    <button class="fab" id="fab" aria-label="Добавить заказ"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+</div>
+<div class="sh" id="sh"><div id="shc"></div></div>
+<div class="dlg" id="dlg"><div id="dlgc"></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>(function(){var k='';try{var m=location.hash.match(/k=([0-9a-f]+)/);if(m){k=m[1];localStorage.setItem('pk',k);history.replaceState(null,'',location.pathname)}else k=localStorage.getItem('pk')||''}catch(e){}window.PLANNER={key:k||'__none',api:'__API__',files:'__FILES__',bot:'EzhednevnikRobot'};try{var t=window.Telegram.WebApp;t.ready();t.expand()}catch(e){}})();</script>
+<script>
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+const TODAY=iso(new Date());
+const MON=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MONN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const WD=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const rub=n=>Math.round(n).toLocaleString('ru-RU').replace(/ | /g,' ')+' ₽';
+const dm=s=>{const d=parse(s);return pad(d.getDate())+'.'+pad(d.getMonth()+1)};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let uid=Date.now();const nid=()=>'i'+(uid++);
+const ck=(on,bad,attrs)=>`<button class="ck ${on?'on':''} ${bad?'bad':''}" ${attrs}><i><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></i></button>`;
+const ICO={orders:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',sup:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.3"/><path d="M3 19.5c.5-3.4 3-5.2 6-5.2s5.5 1.8 6 5.2M16.5 5.2a3.2 3.2 0 0 1 0 5.8M18 14.6c2 .5 3.2 2.1 3.5 4.9"/></svg>',pay:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18M7 15.5h3"/></svg>'};
+const BELL='<svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></svg>';
+const PLUS='<svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>';
+
+/* ---------- контакты ---------- */
+function normTG(t){t=(t||'').trim();let m=t.match(/(?:https?:\/\/)?(?:t|telegram)\.me\/(\+?\w+)/i);if(m)return 'https://t.me/'+m[1];
+  if(/^@?[A-Za-z][A-Za-z0-9_]{4,31}$/.test(t))return 'https://t.me/'+t.replace(/^@/,'');
+  let dg=t.replace(/\D/g,'');if(/^[+\d\s().-]+$/.test(t)&&dg.length>=10){if(dg.length===11&&dg[0]==='8')dg='7'+dg.slice(1);else if(dg.length===10)dg='7'+dg;return 'https://t.me/+'+dg}return null}
+function normMAX(t){const m=(t||'').trim().match(/(?:https?:\/\/)?((?:web\.)?max\.ru\/\S+)/i);return m?'https://'+m[1]:null}
+const tgLabel=u=>{if(!u)return '';const x=u.split('t.me/')[1]||'';return x.startsWith('+')?x:'@'+x};
+
+/* ---------- данные и синхронизация ---------- */
+const CFG=window.PLANNER||{};
+const REMOTE=!!CFG.key&&!/^__/.test(CFG.key);if(!REMOTE)document.addEventListener('DOMContentLoaded',()=>{document.body.insertAdjacentHTML('afterbegin','<div style="padding:24px;font:16px sans-serif">Откройте приложение из бота кнопкой «Открыть» в Telegram.</div>')});
+const KEY='planner_local_v2';
+const MAPK={sup:'sup',term:'terms',order:'orders',rem:'rems'};
+const DEF=()=>({rev:0,sup:[],orders:[],rems:[],terms:[{id:'t0',name:'По факту',days:0},{id:'t14',name:'Отсрочка 14 дней',days:14},{id:'t21',name:'Отсрочка 21 день',days:21}],settings:{rd:[7,3,1,0],time:'09:00',overdue:true}});
+function applyOps(s,ops){
+  for(const op of ops){
+    if(op.t==='settings'&&op.op==='set')s.settings={...s.settings,...op.v};
+    else if(op.t==='all'&&op.op==='set'){const k=s.rev;Object.assign(s,DEF(),op.v);s.rev=k}
+    else if(MAPK[op.t]){const c=MAPK[op.t];
+      if(op.op==='set'){const i=s[c].findIndex(x=>x.id===op.v.id);if(i>=0)s[c][i]=op.v;else s[c].push(op.v)}
+      else if(op.op==='del')s[c]=s[c].filter(x=>x.id!==op.id)}
+  }
+  s.rev++;return s;
+}
+let D=DEF(),busy=0;
+const url=(a,extra)=>`${CFG.api||''}api.php?k=${encodeURIComponent(CFG.key)}${a?'&a='+a:''}${extra||''}`;
+async function pull(){
+  if(!REMOTE){try{D=JSON.parse(localStorage.getItem(KEY))||seedLocal()}catch(e){D=seedLocal()}return}
+  const r=await fetch(url('state'),{cache:'no-store'});if(!r.ok)throw new Error(r.status);D=await r.json();
+}
+function seedLocal(){const d=DEF();return d}
+async function commit(ops){
+  applyOps(D,ops);render();
+  if(!REMOTE){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Не хватило памяти браузера')}return}
+  busy++;
+  try{const r=await fetch(url('ops'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ops})});if(!r.ok)throw new Error(r.status);const s=await r.json();if(busy===1){D=s;if(!openSheet())render()}}
+  catch(e){toast('Нет связи, изменение не сохранено');try{await pull();render()}catch(_){}}
+  finally{busy--}
+}
+const openSheet=()=>$('#sh').classList.contains('on');
+setInterval(async()=>{if(!REMOTE||busy||openSheet()||document.hidden)return;try{const rev=D.rev;await pull();if(D.rev!==rev)render()}catch(e){}},8000);
+const supOf=id=>D.sup.find(s=>s.id===id)||{name:'—',phones:[]};
+const termOf=id=>D.terms.find(t=>t.id===id)||{name:'—',days:0};
+const tdays=o=>o.term==='custom'?(+o.days||0):termOf(o.term).days;
+const tname=o=>o.term==='custom'?`Другой срок, ${tdays(o)} дн.`:termOf(o.term).name;
+const due=o=>addD(o.date,tdays(o));
+let S={tab:'orders',view:'day',cur:TODAY};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+const byDate=ds=>D.orders.filter(o=>o.date===ds);
+const dayLabel=s=>{const d=parse(s);return WD[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]};
+const monday=s=>{const d=parse(s);d.setDate(d.getDate()-(d.getDay()+6)%7);return iso(d)};
+const fileUrl=f=>f?(f.data||((/^https?:/.test(f.url)?'':(CFG.files||''))+f.url)):'';
+
+/* ---------- списки заказов ---------- */
+function row(o,full){
+  const sp=supOf(o.sup),dd=due(o),od=!o.paid&&dd<TODAY;
+  const sub=o.paid?'оплачен':(full?'':'оплата ')+'до '+dm(dd)+(od?' · просрочено':'');
+  return `<div class="row" data-open="${o.id}"><div class="t"><div class="n">${esc(sp.name)}</div><div class="s ${od?'od':''}">${full?'от '+dm(o.date)+' · ':''}${sub}${o.file?' · счёт':''}</div></div><div class="a">${rub(o.amount)}</div>${ck(o.ordered,false,`data-flag="ordered" data-id="${o.id}" aria-label="Заказан"`)}${ck(o.paid,od,`data-flag="paid" data-id="${o.id}" aria-label="Оплачен"`)}</div>`;
+}
+const list=(l,full)=>l.length?`<div class="list"><div class="colh"><span>Заказан</span><span>Оплачен</span></div>${l.map(o=>row(o,full)).join('')}</div>`:'';
+function sumbox(l){
+  if(!l.length)return '';
+  const tot=l.reduce((a,o)=>a+o.amount,0),paid=l.filter(o=>o.paid).reduce((a,o)=>a+o.amount,0);
+  return `<div class="sum"><div><small>Оплачено</small><b>${rub(paid)}</b></div><div><small>Осталось оплатить</small><b class="${tot-paid>0?'r':''}">${rub(tot-paid)}</b></div><div class="bar"><i style="width:${tot?paid/tot*100:0}%"></i></div></div>`;
+}
+const bellBtn=`<button class="ib" data-tab="rem" aria-label="Напоминания">${BELL}</button>`;
+
+function renderOrders(){
+  let h=`<div class="top"><h1>Заказы</h1><div class="r"><button class="txt" data-today>Сегодня</button>${bellBtn}</div></div><div class="seg">${[['day','День'],['week','Неделя'],['month','Месяц']].map(([k,t])=>`<button class="${S.view===k?'on':''}" data-view="${k}">${t}</button>`).join('')}</div>`;
+  if(S.view==='day'){
+    const l=byDate(S.cur);
+    h+=`<div class="nav"><button data-step="-1">‹</button><b>${dayLabel(S.cur)}</b><button data-step="1">›</button></div>`+sumbox(l)+list(l);
+    if(!l.length)h+='<div class="empty">В этот день заказов нет. Нажмите «+», чтобы добавить.</div>';
+  }
+  if(S.view==='week'){
+    const m=monday(S.cur),e=addD(m,6),a=parse(m),b=parse(e);
+    h+=`<div class="nav"><button data-step="-7">‹</button><b>${a.getDate()} ${MON[a.getMonth()]} – ${b.getDate()} ${MON[b.getMonth()]}</b><button data-step="7">›</button></div>`;
+    h+=sumbox(D.orders.filter(o=>o.date>=m&&o.date<=e));
+    for(let i=0;i<7;i++){
+      const ds=addD(m,i),d=parse(ds),l=byDate(ds);
+      h+=`<div class="dh ${ds===TODAY?'today':''}"><b>${WD[d.getDay()]}, ${d.getDate()}.${pad(d.getMonth()+1)}${ds===TODAY?'<small>сегодня</small>':''}</b><button class="add" data-add="${ds}" aria-label="Добавить">${PLUS}</button></div>`;
+      h+=l.length?list(l):'<div class="empty">нет заказов</div>';
+    }
+  }
+  if(S.view==='month'){
+    const c=parse(S.cur),y=c.getFullYear(),mo=c.getMonth();
+    h+=`<div class="nav"><button data-mstep="-1">‹</button><b>${MONN[mo]} ${y}</b><button data-mstep="1">›</button></div><div class="cal">`+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x=>`<div class="h">${x}</div>`).join('');
+    const sh=(new Date(y,mo,1).getDay()+6)%7,st=iso(new Date(y,mo,1-sh));
+    for(let i=0;i<42;i++){
+      const ds=addD(st,i),d=parse(ds);if(i>=35&&d.getMonth()!==mo)break;
+      const l=byDate(ds);let dots='<div class="dots"></div>';
+      if(l.length){const unp=l.filter(o=>!o.paid),bad=unp.some(o=>due(o)<TODAY);dots=`<div class="dots">${l.length>unp.length?'<u></u>':''}${unp.length?`<u class="${bad?'r':'a'}"></u>`:''}</div>`}
+      h+=`<button class="${d.getMonth()!==mo?'out ':''}${ds===TODAY?'td ':''}${ds===S.cur?'sel':''}" data-pick="${ds}"><span>${d.getDate()}</span>${dots}</button>`;
+    }
+    const l=byDate(S.cur);
+    h+=`</div><div class="dh"><b>${dayLabel(S.cur)}</b><button class="add" data-add="${S.cur}" aria-label="Добавить">${PLUS}</button></div>`+sumbox(l)+(l.length?list(l):'<div class="empty">В этот день заказов нет</div>');
+  }
+  $('#main').innerHTML=h;
+}
+
+/* ---------- поставщики ---------- */
+function actsFor(s,withCall){
+  const calls=withCall?s.phones.map(p=>`<button data-call="${esc(p)}" data-cname="${esc(s.name)}">Позвонить ${s.phones.length>1?esc(p.slice(-5)):''}</button>`).join(''):'';
+  return calls+(s.tg?`<a href="${esc(s.tg)}" target="_blank" rel="noopener">Telegram</a>`:'<button class="off" data-needtg>Telegram</button>')+(s.max?`<a href="${esc(s.max)}" target="_blank" rel="noopener">MAX</a>`:'<button class="off" data-needmax>MAX</button>');
+}
+function renderSup(){
+  let h=`<div class="top"><h1>Поставщики</h1><button class="txt" data-supadd>+ Новый</button></div>`;
+  h+=D.sup.length?D.sup.map(s=>`<div class="sup" data-supedit="${s.id}"><div class="nm"><b>${esc(s.name)}</b><span class="txt">Изменить</span></div>`+
+   s.phones.map(p=>`<div class="ph"><span>${esc(p)}</span><button class="txt" data-call="${esc(p)}" data-cname="${esc(s.name)}">Позвонить</button></div>`).join('')+`<div class="acts">${actsFor(s,false)}</div></div>`).join(''):'<div class="empty">Пока никого нет. Нажмите «+ Новый».</div>';
+  $('#main').innerHTML=h;
+}
+
+/* ---------- оплата ---------- */
+function renderPay(){
+  const up=D.orders.filter(o=>!o.paid).sort((a,b)=>due(a)<due(b)?-1:1),tom=addD(TODAY,1);
+  const week=up.filter(o=>due(o)>=TODAY&&due(o)<=addD(TODAY,7)).reduce((a,o)=>a+o.amount,0);
+  const over=up.filter(o=>due(o)<TODAY).reduce((a,o)=>a+o.amount,0);
+  let h=`<div class="top"><h1>Оплата</h1><div class="r">${bellBtn}</div></div>`;
+  h+=`<div class="hero"><small>К оплате в ближайшие 7 дней</small><b>${rub(week)}</b>${over?`<div class="od">Просрочено: ${rub(over)}</div>`:''}</div>`;
+  const g={};up.forEach(o=>{(g[due(o)]=g[due(o)]||[]).push(o)});
+  Object.keys(g).sort().forEach(k=>{
+    const od=k<TODAY,lab=k===TODAY?'Сегодня':k===tom?'Завтра':od?'Просрочено с '+dm(k):dayLabel(k);
+    h+=`<div class="gh ${od?'od':''}"><span>${lab}</span><span>${rub(g[k].reduce((a,o)=>a+o.amount,0))}</span></div>`+list(g[k],true);
+  });
+  if(!up.length)h+='<div class="empty">Все заказы оплачены.</div>';
+  $('#main').innerHTML=h;
+}
+
+/* ---------- напоминания (отдельный экран) ---------- */
+function reminderText(){
+  const rd=[...D.settings.rd].sort((a,b)=>b-a),up=D.orders.filter(o=>!o.paid),parts=[];
+  const lab=n=>n===0?'Сегодня':n===1?'Завтра':n===7?'Через неделю':`Через ${n} ${[2,3,4].includes(n%10)&&![12,13,14].includes(n)?'дня':'дней'}`;
+  for(const n of rd){const l=up.filter(o=>due(o)===addD(TODAY,n));if(l.length)parts.push(`<b>${lab(n)} оплата ${rub(l.reduce((a,o)=>a+o.amount,0))}:</b>\n`+l.map(o=>'• '+esc(supOf(o.sup).name)+' — '+rub(o.amount)).join('\n'))}
+  const od=up.filter(o=>due(o)<TODAY);
+  if(D.settings.overdue&&od.length)parts.push(`<b>⚠ Просрочено ${rub(od.reduce((a,o)=>a+o.amount,0))}:</b>\n`+od.map(o=>'• '+esc(supOf(o.sup).name)+' — '+rub(o.amount)).join('\n'));
+  return parts.join('\n\n');
+}
+function renderRem(){
+  const st=D.settings,rd=[...st.rd].sort((a,b)=>b-a),std=[7,5,3,2,1,0],extra=rd.filter(n=>!std.includes(n));
+  const nowT=new Date(),[hh,mm]=(st.time||'09:00').split(':').map(Number),first=new Date(nowT.getFullYear(),nowT.getMonth(),nowT.getDate(),hh,mm);
+  const nextLabel=(nowT<first?'сегодня':'завтра')+' в '+st.time;
+  const txt=reminderText(),rems=D.rems.filter(r=>!r.done).sort((a,b)=>a.at<b.at?-1:1);
+  const dnow=new Date(),dd=iso(dnow);
+  let h=`<div class="top"><h1>Напоминания</h1><button class="txt" data-tab="pay">Закрыть</button></div>`;
+  h+=`<div class="card"><h3>Об оплатах</h3><div class="hint">Выберите, за сколько дней до срока напоминать. Можно отметить несколько.</div>
+   <div class="rem">${std.map(n=>`<button class="${rd.includes(n)?'on':''}" data-rd="${n}">${n===0?'В день срока':'За '+n+' дн.'}</button>`).join('')}${extra.map(n=>`<button class="on" data-rd="${n}">За ${n} дн. ×</button>`).join('')}</div>
+   <label>Свой срок, за сколько дней</label><div class="two"><input id="rdn" type="number" inputmode="numeric" placeholder="Например, 10" min="1" max="365"><button class="btn sec" style="margin:0" data-rdadd>Добавить</button></div>
+   <label>Время отправки</label><input type="time" id="rtime" value="${esc(st.time)}">
+   <div class="swr" style="margin-top:12px"><span>Напоминать о просроченных каждый день</span><button class="sw ${st.overdue?'on':''}" data-rov aria-label="Просроченные"></button></div></div>`;
+  h+=`<div class="card"><h3>Как это будет выглядеть</h3><div class="hint">Ближайшая отправка: <b>${nextLabel}</b>. Текст составляется по вашим заказам.</div><div class="prev">${txt||'Сейчас нет платежей, о которых нужно напоминать.'}</div></div>`;
+  h+=`<div class="card"><h3>Свои напоминания</h3><div class="hint">Напомнить о чём угодно: позвонить поставщику, проверить накладную.</div>`+(rems.length?rems.map(r=>`<div class="rl"><div>${esc(r.text)}<small>${dm(r.at.slice(0,10))} в ${r.at.slice(11,16)}</small></div><button class="txt" data-remdel="${r.id}">Удалить</button></div>`).join(''):'<div class="empty" style="margin-top:8px">Пока нет.</div>')+
+   `<label>Что напомнить</label><input id="rtext" placeholder="Например, позвонить поставщику 2"><div class="two"><div><label>Дата</label><input type="date" id="rdate" value="${dd}"></div><div><label>Время</label><input type="time" id="rat" value="${st.time}"></div></div><button class="btn" data-remadd>Создать напоминание</button></div>`;
+  h+=`<div class="card"><h3>Куда приходят</h3><div class="hint">Напоминания присылает Telegram-бот, поэтому они работают и на iPhone, и на Android, без установки приложений. Бот и этот сайт показывают одни и те же данные.</div><a class="btn sec" style="text-align:center;text-decoration:none" href="https://t.me/${esc(CFG.bot||'')}" target="_blank" rel="noopener">Открыть бота</a></div>`;
+  h+=`<div class="cap">Для показа</div><div class="acts" style="margin:0 2px"><button data-demo>Заполнить примерами</button><button data-clear>Очистить заказы</button></div>`;
+  $('#main').innerHTML=h;
+}
+function demoState(){
+  const d=n=>addD(TODAY,n),sup=[1,2,3,4].map(i=>({id:'s'+i,name:'Поставщик '+i,phones:['+7 900 000-00-0'+i],tg:'',max:''}));sup[1].phones.push('+7 900 000-00-12');
+  const o=(i,s,dd,t,a,or,p)=>({id:'o'+i,sup:'s'+s,date:d(dd),term:t,amount:a,ordered:!!or,paid:!!p,file:null});
+  return {...D,sup,rems:[],orders:[o(1,1,-13,'t14',10000,1,0),o(2,2,-20,'t21',30000,1,0),o(3,3,-13,'t14',10000,1,0),o(4,4,-16,'t14',12440,1,0),o(5,1,-9,'t0',8300,1,1),o(6,2,-3,'t14',26630,1,1),o(7,1,0,'t14',24600,0,0),o(8,3,0,'t14',13440,1,0),o(9,2,1,'t21',33000,0,0),o(10,4,3,'t14',18900,0,0),o(11,1,6,'t14',9400,0,0)]};
+}
+
+function render(){
+  $('#nav').innerHTML=[['orders','Заказы'],['sup','Поставщики'],['pay','Оплата']].map(([k,t])=>`<button class="${S.tab===k?'on':''}" data-tab="${k}">${ICO[k]}${t}</button>`).join('');
+  const sc=$('#main').scrollTop;
+  ({orders:renderOrders,sup:renderSup,pay:renderPay,rem:renderRem})[S.tab]();
+  $('#main').scrollTop=sc;
+}
+
+/* ---------- заказ ---------- */
+let F=null;
+function openOrder(id,date){
+  const o=id?D.orders.find(x=>x.id===id):null;
+  F=o?{...o}:{id:null,sup:D.sup[0]&&D.sup[0].id,date:date||S.cur,term:D.terms[0]&&D.terms[0].id,days:'',amount:'',ordered:false,paid:false,file:null};
+  drawOrder(!!o);$('#sh').classList.add('on');
+}
+function drawOrder(edit){
+  const dd=F.term==='custom'?(F.days!==''?dm(addD(F.date,+F.days||0)):''):(F.term?dm(addD(F.date,termOf(F.term).days)):'');
+  const sp=D.sup.find(s=>s.id===F.sup);
+  $('#shc').innerHTML=`<h2>${edit?'Заказ':'Новый заказ'}</h2>
+  <label>Поставщик</label><select id="fs">${D.sup.map(s=>`<option value="${s.id}" ${s.id===F.sup?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+  ${sp?`<div class="acts">${actsFor(sp,true)}</div>`:''}
+  <div class="two"><div><label>Дата заказа</label><input type="date" id="fd" value="${F.date}"></div><div><label>Сумма, ₽</label><input id="fa" type="number" inputmode="decimal" placeholder="0" value="${F.amount}"></div></div>
+  <label>Срок оплаты${dd?' · оплатить до '+dd:''}</label><select id="ft">${D.terms.map(t=>`<option value="${t.id}" ${t.id===F.term?'selected':''}>${esc(t.name)}</option>`).join('')}<option value="custom" ${F.term==='custom'?'selected':''}>Другой срок…</option></select>
+  ${F.term==='custom'?`<label>Через сколько дней оплата</label><input id="fdays" type="number" inputmode="numeric" min="0" max="365" placeholder="Например, 10" value="${F.days}">`:''}
+  <button class="txt" data-terms style="margin-top:4px;font-size:14px">Изменить список сроков</button>
+  <label>Счёт на оплату</label>
+  <label class="file"><input type="file" id="ff" accept="image/*,application/pdf"><svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5.5 5.5 0 0 1-7.8-7.8l8.8-8.8a3.7 3.7 0 0 1 5.2 5.2l-8.8 8.8a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg><span>${F.file?esc(F.file.name):'Приложить PDF или скриншот'}</span></label>
+  ${F.file&&F.file.type&&F.file.type.startsWith('image/')&&fileUrl(F.file)?`<img class="fv" src="${esc(fileUrl(F.file))}">`:''}
+  ${F.file&&fileUrl(F.file)?`<a class="txt" style="display:inline-block;margin-top:6px" href="${esc(fileUrl(F.file))}" target="_blank" rel="noopener">Открыть счёт</a>`:''}
+  <div class="tg">${ck(F.ordered,false,'id="fo"')}Заказан</div><div class="tg">${ck(F.paid,false,'id="fp"')}Оплачен</div>
+  <button class="btn" id="fsave">Сохранить</button>${edit?'<button class="btn del" id="fdel">Удалить заказ</button>':''}<button class="btn sec" id="fcancel">Закрыть</button>`;
+}
+function pullForm(){if(!$('#fs'))return;F.sup=$('#fs').value;F.date=$('#fd').value||F.date;F.amount=$('#fa').value;F.term=$('#ft').value;if($('#fdays'))F.days=$('#fdays').value}
+document.addEventListener('change',async e=>{
+  if(e.target.id==='ff'){
+    const f=e.target.files[0];if(!f)return;pullForm();
+    if(REMOTE){
+      toast('Загружаю счёт…');const fd=new FormData();fd.append('f',f);
+      try{const r=await fetch(url('', '').replace('api.php','upload.php'),{method:'POST',body:fd});if(!r.ok)throw 0;const j=await r.json();F.file={name:j.name,url:j.url,type:j.type};drawOrder(!!F.id)}
+      catch(_){toast('Не удалось загрузить файл (PDF или картинка до 12 МБ)')}
+    }else{
+      const r=new FileReader();r.onload=()=>{F.file={name:f.name,type:f.type,data:f.size<1500000?r.result:null};drawOrder(!!F.id)};r.readAsDataURL(f);
+    }
+  }else if(['fs','ft','fd'].includes(e.target.id)){pullForm();drawOrder(!!F.id)}
+  else if(e.target.id==='rtime'){commit([{t:'settings',op:'set',v:{time:e.target.value||'09:00'}}])}
+});
+document.addEventListener('input',e=>{if(e.target.id==='fdays'){F.days=e.target.value}});
+const closeSh=()=>{$('#sh').classList.remove('on');F=null};
+
+/* ---------- поставщик (форма) ---------- */
+function openSup(id){const s=id?D.sup.find(x=>x.id===id):{id:null,name:'',phones:[''],tg:'',max:''};F={sup:true,id:s.id,name:s.name,phones:s.phones.length?[...s.phones]:[''],tg:tgLabel(s.tg),max:s.max||''};drawSup();$('#sh').classList.add('on')}
+function drawSup(){
+  $('#shc').innerHTML=`<h2>${F.id?'Поставщик':'Новый поставщик'}</h2><label>Название</label><input id="sn" value="${esc(F.name)}">
+  <label>Номера телефонов (для звонка)</label>${F.phones.map(p=>`<input class="sp" value="${esc(p)}" placeholder="+7 900 123-45-67" inputmode="tel" style="margin-bottom:8px">`).join('')}
+  <button class="txt" id="spadd">+ Ещё номер</button>
+  <label>Telegram: номер или @username</label><input id="stg" value="${esc(F.tg)}" placeholder="+7 900 123-45-67 или @username"><div class="hint">Ссылку на Telegram соберём сами. Можно вставить и готовую ссылку t.me/…</div>
+  <label>MAX: ссылка на профиль</label><input id="smx" value="${esc(F.max)}" placeholder="https://max.ru/u/…"><div class="hint">В MAX по номеру ссылку собрать нельзя, поэтому вставьте ссылку на профиль поставщика.</div>
+  <button class="btn" id="spsave">Сохранить</button>${F.id?'<button class="btn del" id="spdel">Удалить</button>':''}<button class="btn sec" id="fcancel">Закрыть</button>`;
+}
+const pullSup=()=>{F.name=$('#sn').value;F.phones=[...document.querySelectorAll('.sp')].map(i=>i.value);F.tg=$('#stg').value;F.max=$('#smx').value};
+function openTerms(){
+  if(F&&F.sup!==true)pullForm();F={terms:true,back:F};
+  $('#shc').innerHTML=`<h2>Сроки оплаты</h2><div class="hint">«Другой срок» выбирается в заказе всегда, его здесь добавлять не нужно.</div><div class="chips">${D.terms.map(t=>`<span>${esc(t.name)}<button data-termdel="${t.id}">×</button></span>`).join('')}</div>
+  <div class="two"><div style="flex:2"><label>Название</label><input id="tn" placeholder="Отсрочка 10 дней"></div><div><label>Дней</label><input id="td" type="number" inputmode="numeric"></div></div>
+  <button class="btn" data-termadd>Добавить срок</button><button class="btn sec" data-termsback>Назад к заказу</button>`;
+}
+function askCall(p,name){
+  $('#dlgc').innerHTML=`<h3>Позвонить?</h3><p>${esc(name)}<br><b style="color:var(--ink)">${esc(p)}</b></p><button class="btn" data-docall="${esc(p.replace(/[^\d+]/g,''))}">Позвонить</button><button class="btn sec" data-dlgx>Отмена</button>`;
+  $('#dlg').classList.add('on');
+}
+document.addEventListener('click',e=>{
+  const t=e.target,c=s=>t.closest(s);let x;
+  if(x=c('[data-flag]')){e.stopPropagation();const o={...D.orders.find(o=>o.id===x.dataset.id)},f=x.dataset.flag;o[f]=!o[f];if(f==='paid'&&o.paid)o.ordered=true;if(f==='ordered'&&!o.ordered)o.paid=false;commit([{t:'order',op:'set',v:o}]);return}
+  if(x=c('[data-call]')){e.stopPropagation();askCall(x.dataset.call,x.dataset.cname);return}
+  if(x=c('[data-docall]')){location.href='tel:'+x.dataset.docall;$('#dlg').classList.remove('on');return}
+  if(c('[data-dlgx]')||(c('#dlg')&&!c('#dlgc'))){$('#dlg').classList.remove('on');return}
+  if(c('[data-needtg]')){e.stopPropagation();toast('Добавьте Telegram в карточке поставщика');return}
+  if(c('[data-needmax]')){e.stopPropagation();toast('Добавьте ссылку на MAX в карточке поставщика');return}
+  if(x=c('[data-rd]')){const n=+x.dataset.rd,rd=D.settings.rd.includes(n)?D.settings.rd.filter(v=>v!==n):[...D.settings.rd,n];commit([{t:'settings',op:'set',v:{rd}}]);return}
+  if(c('[data-rdadd]')){const n=parseInt($('#rdn').value);if(isNaN(n)||n<1||n>365){toast('Введите число дней от 1 до 365');return}commit([{t:'settings',op:'set',v:{rd:[...new Set([...D.settings.rd,n])]}}]);return}
+  if(c('[data-rov]')){commit([{t:'settings',op:'set',v:{overdue:!D.settings.overdue}}]);return}
+  if(c('[data-remadd]')){const tx=$('#rtext').value.trim(),dt=$('#rdate').value,tm=$('#rat').value;if(!tx||!dt||!tm){toast('Заполните текст, дату и время');return}
+    if(dt+' '+tm<=iso(new Date())+' '+pad(new Date().getHours())+':'+pad(new Date().getMinutes())){toast('Это время уже прошло');return}
+    commit([{t:'rem',op:'set',v:{id:nid(),text:tx,at:dt+' '+tm,done:false}}]);return}
+  if(x=c('[data-remdel]')){commit([{t:'rem',op:'del',id:x.dataset.remdel}]);return}
+  if(c('[data-demo]')){commit([{t:'all',op:'set',v:demoState()}]);toast('Примеры добавлены');return}
+  if(c('[data-clear]')){commit([{t:'all',op:'set',v:{...D,orders:[],rems:[]}}]);toast('Заказы очищены');return}
+  if(x=c('[data-open]')){openOrder(x.dataset.open);return}
+  if(x=c('[data-tab]')){S.tab=x.dataset.tab;render();$('#main').scrollTop=0;return}
+  if(x=c('[data-view]')){S.view=x.dataset.view;render();return}
+  if(c('[data-today]')){S.cur=TODAY;render();return}
+  if(x=c('[data-step]')){S.cur=addD(S.cur,+x.dataset.step);render();return}
+  if(x=c('[data-mstep]')){const d=parse(S.cur);d.setMonth(d.getMonth()+ +x.dataset.mstep,1);S.cur=iso(d);render();return}
+  if(x=c('[data-pick]')){S.cur=x.dataset.pick;render();return}
+  if(x=c('[data-add]')){if(!D.sup.length){toast('Сначала добавьте поставщика');S.tab='sup';render();return}openOrder(null,x.dataset.add);return}
+  if(c('#fab')){if(!D.sup.length){toast('Сначала добавьте поставщика');S.tab='sup';render();return}openOrder(null,S.tab==='orders'?S.cur:TODAY);return}
+  if(c('[data-supadd]')){openSup();return}
+  if(x=c('[data-supedit]')){openSup(x.dataset.supedit);return}
+  if(c('#sh')&&!c('#shc')){closeSh();return}
+  if(c('#fcancel')){closeSh();return}
+  if(c('[data-terms]')){openTerms();return}
+  if(x=c('[data-termdel]')){if(D.terms.length>1&&!D.orders.some(o=>o.term===x.dataset.termdel)){const b=F.back;commit([{t:'term',op:'del',id:x.dataset.termdel}]);F={terms:true,back:b};openTerms2(b)}else toast('Срок используется в заказах');return}
+  if(c('[data-termadd]')){const n=$('#tn').value.trim(),d=parseInt($('#td').value);if(!n||isNaN(d)||d<0){toast('Введите название и дни');return}const b=F.back;commit([{t:'term',op:'set',v:{id:nid(),name:n,days:d}}]);openTerms2(b);return}
+  if(c('[data-termsback]')){F=F.back;if(F)drawOrder(!!F.id);else closeSh();return}
+  if(c('#fo')){pullForm();F.ordered=!F.ordered;if(!F.ordered)F.paid=false;drawOrder(!!F.id);return}
+  if(c('#fp')){pullForm();F.paid=!F.paid;if(F.paid)F.ordered=true;drawOrder(!!F.id);return}
+  if(c('#fsave')){pullForm();const a=parseFloat(F.amount);if(!F.sup){toast('Добавьте поставщика');return}if(isNaN(a)||a<=0){toast('Введите сумму');return}
+    if(F.term==='custom'&&(F.days===''||isNaN(+F.days)||+F.days<0)){toast('Введите, через сколько дней оплата');return}
+    const rec={id:F.id||nid(),sup:F.sup,date:F.date,term:F.term,amount:a,ordered:F.ordered,paid:F.paid,file:F.file||null};if(F.term==='custom')rec.days=+F.days;
+    S.cur=F.date;closeSh();commit([{t:'order',op:'set',v:rec}]);return}
+  if(c('#fdel')){const id=F.id;closeSh();commit([{t:'order',op:'del',id}]);return}
+  if(c('#spadd')){pullSup();F.phones.push('');drawSup();return}
+  if(c('#spsave')){pullSup();const n=F.name.trim();if(!n){toast('Введите название');return}
+    const tgv=F.tg.trim(),mxv=F.max.trim();let tgu='',mxu='';
+    if(tgv){tgu=normTG(tgv);if(!tgu){toast('Telegram: введите номер, @username или ссылку t.me');return}}
+    if(mxv){mxu=normMAX(mxv);if(!mxu){toast('MAX: вставьте ссылку на профиль (max.ru/…)');return}}
+    const rec={id:F.id||nid(),name:n,phones:F.phones.map(p=>p.trim()).filter(Boolean),tg:tgu,max:mxu};closeSh();commit([{t:'sup',op:'set',v:rec}]);return}
+  if(c('#spdel')){if(D.orders.some(o=>o.sup===F.id)){toast('У поставщика есть заказы, удалить нельзя');return}const id=F.id;closeSh();commit([{t:'sup',op:'del',id}]);return}
+});
+function openTerms2(back){F={terms:true,back};
+  $('#shc').innerHTML=`<h2>Сроки оплаты</h2><div class="hint">«Другой срок» выбирается в заказе всегда, его здесь добавлять не нужно.</div><div class="chips">${D.terms.map(t=>`<span>${esc(t.name)}<button data-termdel="${t.id}">×</button></span>`).join('')}</div>
+  <div class="two"><div style="flex:2"><label>Название</label><input id="tn" placeholder="Отсрочка 10 дней"></div><div><label>Дней</label><input id="td" type="number" inputmode="numeric"></div></div>
+  <button class="btn" data-termadd>Добавить срок</button><button class="btn sec" data-termsback>Назад к заказу</button>`}
+(async()=>{try{await pull()}catch(e){$('#main').innerHTML='<div class="load">Не удалось загрузить данные. Проверьте интернет и обновите страницу.</div>';return}render()})();
+</script></body></html>
