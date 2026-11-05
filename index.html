@@ -145,7 +145,7 @@ input:focus,select:focus{border-color:var(--blue)}
 <div class="dlg" id="dlg"><div id="dlgc"></div></div>
 <div class="toast" id="toast"></div>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>(function(){var k='';try{var m=location.hash.match(/k=([0-9a-f]+)/);if(m){k=m[1];localStorage.setItem('pk',k);history.replaceState(null,'',location.pathname)}else k=localStorage.getItem('pk')||''}catch(e){}window.PLANNER={key:k||'__none',api:'__API__',files:'__FILES__',bot:'EzhednevnikRobot'};try{var t=window.Telegram.WebApp;t.ready();t.expand()}catch(e){}})();</script>
+<script>(function(){var k='';try{var m=(location.search+location.hash).match(/[?&#]k=([0-9a-f]+)/);if(m){k=m[1];localStorage.setItem('pk',k);history.replaceState(null,'',location.pathname)}else k=localStorage.getItem('pk')||''}catch(e){}window.PLANNER={key:k||'__none',api:'https://planner-proxy.levkaz26.workers.dev/',files:'http://a1321684.xsph.ru/planner-1f21cf93e795ff11/',bot:'EzhednevnikRobot'};try{var t=window.Telegram.WebApp;t.ready();t.expand()}catch(e){}})();</script>
 <script>
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
