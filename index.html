@@ -345,13 +345,7 @@ if(REMOTE){try{const s=document.createElement('script');s.src='https://telegram.
 /* ---------- данные в формате бота ---------- */
 const DEF_TERMS=()=>[{id:'t0',name:'По факту',days:0},{id:'t14',name:'Отсрочка 14 дней',days:14},{id:'t21',name:'Отсрочка 21 день',days:21}];
 const DEF_SET=()=>({rd:[5,1,0],time:'09:00',overdue:true});
-function seed(){
-  const T=today(),at=n=>new Date(Date.now()-n*864e5).toISOString();
-  const sup=[['s1','Ткани Север',['+7 900 000-00-01'],'@tkani_sever'],['s2','Упаковка-Сервис',['+7 900 000-00-02','+7 900 000-00-12'],''],['s3','Фурнитура 24',['+7 900 000-00-03'],''],['s4','ИП Громов',['+7 900 000-00-04'],''],['s5','Печатный двор',[],''],['s6','Логистик-Юг',['+7 900 000-00-06'],'']].map(a=>({id:a[0],name:a[1],phones:a[2],tg:a[3],max:'',wa:''}));
-  const O=[['s1',48200,-20,'t14',1,0],['s2',12500,-12,'t14',1,0],['s3',7300,-9,'t0',1,0],['s1',95000,-5,'t21',1,0],['s4',18000,-3,'t0',1,0],['s5',21800,-2,'t0',0,0],['s6',33400,-1,'t14',1,0],['s2',8900,0,'t14',0,0],['s3',15600,-30,'t14',1,1],['s5',64000,-18,'t14',1,1],['s6',5200,-6,'custom',1,0,9],['s1',27000,-40,'t14',1,1]];
-  const orders=O.map((a,i)=>{const o={id:'o'+i,sup:a[0],date:addD(T,a[2]),term:a[3],amount:a[1],ordered:!!a[4],paid:!!a[5],file:null,comment:'',hist:[{iso:at(-a[2]),f:['создан']}]};if(a[3]==='custom')o.days=a[6];return o});
-  return{rev:0,sup,terms:DEF_TERMS(),orders,rems:[],settings:DEF_SET()};
-}
+function seed(){return{rev:0,sup:[{id:'s1',name:'Поставщик 1',phones:['+71111111111'],tg:'',max:'',wa:''},{id:'s2',name:'Поставщик 2',phones:['+72222222222'],tg:'',max:'',wa:''}],terms:DEF_TERMS(),orders:[],rems:[],settings:DEF_SET()}}
 function norm(s){
   s=s&&typeof s==='object'?s:{};
   const A=k=>Array.isArray(s[k])?s[k]:[];
@@ -362,11 +356,12 @@ function norm(s){
   if(!Array.isArray(r.settings.rd))r.settings.rd=[5,1,0];
   r.settings.trash=(Array.isArray(r.settings.trash)?r.settings.trash:[]).filter(x=>x&&x.kind==='file'&&x.file).map(x=>Object.assign({},x,{id:x.id||nid(),at:/^\d{4}-\d\d-\d\d$/.test(x.at||'')?x.at:today()}));
   return r}
-let S=norm(REMOTE?null:lsGet('zakazy-v6',null)||seed());
-if(!REMOTE&&!lsGet('zakazy-v6',null))lsSet('zakazy-v6',S);
+try{if(!REMOTE&&!localStorage.getItem('zakazy-v7')){localStorage.removeItem('zakazy-v6');localStorage.removeItem('zakazy-log')}}catch(e){}
+let S=norm(REMOTE?null:lsGet('zakazy-v7',null)||seed());
+if(!REMOTE&&!lsGet('zakazy-v7',null))lsSet('zakazy-v7',S);
 const KIND={sup:'sup',terms:'term',orders:'order',rems:'rem'};
 let queue=[],busy=false,netOk=true,dirty=false,loaded=!REMOTE;
-function persist(){if(!REMOTE)lsSet('zakazy-v6',S)}
+function persist(){if(!REMOTE)lsSet('zakazy-v7',S)}
 function adopt(s){S=norm(s);loaded=true;sweep();initSync()}
 async function flush(){
   if(!REMOTE||busy||!queue.length)return;busy=true;const ops=queue.splice(0);
@@ -496,7 +491,7 @@ function vHome(){
   const tiles=`<div class="strip">${R.map(r=>`<button class="tile ${h.per==='stat'&&h.stat===r[0]?'on':''}" data-a="stat" data-v="${r[0]}"><small><i style="--c:var(--${r[4]})"></i>${r[1]}</small><b>${r[2]}</b>${r[3]?`<em>${r[3]}</em>`:''}</button>`).join('')}</div>`;
   const nav=`${segp([['day','День'],['week','Неделя'],['month','Месяц']],h.mode,'hmode')}<div class="calnav"><button data-a="hprev" aria-label="Назад">${svg('prev')}</button><label>${hLabel()}<input type="date" id="hjump" value="${h.cur}"></label><button data-a="hnext" aria-label="Вперёд"><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)">${IC.prev}</svg></button></div>`;
   const payBlock=h.per==='stat'?'':`<div class="sech"><h2>Оплаты <span>${pay.length} шт.</span></h2></div>
-  <div class="sumline">К оплате: <b>${rub(pay.reduce((a,o)=>a+o.amount,0))}</b></div>${payCards(pay,hf.over.length)}`;
+  <div class="sumline">К оплате: <b>${nf(pay.reduce((a,o)=>a+o.amount,0))} ₽</b></div>${payCards(pay,hf.over.length)}`;
   return `${REMOTE&&!netOk?'<div class="net">Нет связи с сервером, изменения отправятся позже</div>':''}${nav}
   <div class="sech" style="margin-top:12px"><h2>Заказы <span>${hf.l.length} шт.</span></h2></div>
   <div id="hl">${homeList()}</div>${payBlock}<button class="fab" data-a="newOrder" aria-label="Создать заказ">${svg('plus')}</button>`}
