@@ -74,7 +74,7 @@ body.lock{overflow:hidden}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:22px 0 10px}
 header h1{font-size:28px;line-height:1.15;font-weight:700;margin:0;letter-spacing:-.01em}
 main{flex:1;padding:2px 0 150px}
-.g,.tile,.oc,.led,.sum,.chip,.cal,.setrow,.menu,.ib,.segp,.expbtn,.calnav button,.calnav label,.tg,.empty,.btn,.inp,.soc,.toggle.solo,.pickb{-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.g,.tile,.oc,.led,.sum,.chip,.cal,.setrow,.menu,.ib,.segp,.calnav button,.calnav label,.tg,.empty,.btn,.inp,.soc,.toggle.solo,.pickb{-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 .ib{width:44px;height:44px;flex:none;border:1px solid var(--line);border-radius:12px;background:var(--surf);display:flex;align-items:center;justify-content:center;box-shadow:var(--edge),var(--fx)}
 .ib svg{width:20px;height:20px}
 nav{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;margin:0 auto;max-width:536px;background:var(--navbg);border:1px solid var(--line);border-radius:26px;padding:6px;box-shadow:var(--edge),var(--fx);-webkit-backdrop-filter:var(--nblur);backdrop-filter:var(--nblur)}
@@ -214,9 +214,6 @@ button.toggle.solo{background:var(--surf);border:1px solid var(--line);border-ra
 .menu button i{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .menu button .ck{margin-left:auto;color:var(--blue);font-weight:700}
 .menu button[disabled]{opacity:.38;cursor:not-allowed}
-.peek{max-height:64px;overflow:hidden;margin-top:10px;pointer-events:none;-webkit-mask-image:linear-gradient(#000 10%,transparent 95%);mask-image:linear-gradient(#000 10%,transparent 95%);filter:blur(1.2px)}
-.expb{display:flex;justify-content:center;margin-top:8px}
-.expbtn{display:flex;align-items:center;gap:8px;padding:9px 18px;border:1px solid var(--line);border-radius:999px;background:var(--surf);font-size:14px;font-weight:600;box-shadow:var(--edge)}
 .fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:20px;background:var(--blue);color:var(--onblue);z-index:6;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px rgba(30,60,160,.35)}
 :root[data-style="flat"] .fab{box-shadow:none}
 .fab{transition:opacity .2s}
@@ -272,6 +269,21 @@ button.toggle.solo{background:var(--surf);border:1px solid var(--line);border-ra
 .bov{top:332px;padding:14px 30px;border-radius:999px;font-size:38px;font-weight:600;color:var(--br);background:var(--bro);border:2px solid var(--bb);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .bpn{left:64px!important;right:64px;bottom:56px;padding:30px 44px;border-radius:32px;background:var(--bf);border:2px solid var(--bb);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .bpn .p1{font-size:34px;color:var(--bs)}.bpn .p2{font-size:46px;font-weight:700;color:var(--bt);margin:6px 0}.bpn .p3{font-size:34px;color:var(--bs)}
+.fpick{position:relative}
+.fpick .btn{display:block;width:100%;padding-right:46px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:15px;color:var(--ink)}
+.fpick .btn span{display:block;overflow:hidden;text-overflow:ellipsis}
+.fx2{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surf2);color:var(--mute);font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0}
+.edge{position:fixed;left:0;right:0;height:38px;z-index:4;pointer-events:none;opacity:0;transition:opacity .15s;-webkit-backdrop-filter:blur(7px) saturate(1.2);backdrop-filter:blur(7px) saturate(1.2)}
+#edgeT{top:env(safe-area-inset-top,0px);background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 80%,transparent),transparent);-webkit-mask-image:linear-gradient(to bottom,#000,transparent);mask-image:linear-gradient(to bottom,#000,transparent)}
+#edgeB{bottom:80px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 80%,transparent),transparent);-webkit-mask-image:linear-gradient(to top,#000,transparent);mask-image:linear-gradient(to top,#000,transparent)}
+.edge.on{opacity:1}
+html.haswp #edgeT{background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 35%,transparent),transparent)}
+html.haswp #edgeB{background:linear-gradient(to top,color-mix(in srgb,var(--bg) 35%,transparent),transparent)}
+.pe{display:block;position:sticky;height:34px;z-index:3;pointer-events:none;opacity:0;transition:opacity .15s;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.pe.t{top:0;margin:-22px 0 -12px;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 80%,transparent),transparent);-webkit-mask-image:linear-gradient(to bottom,#000,transparent);mask-image:linear-gradient(to bottom,#000,transparent)}
+.pe.b{bottom:0;margin:-12px 0 -24px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 80%,transparent),transparent);-webkit-mask-image:linear-gradient(to top,#000,transparent);mask-image:linear-gradient(to top,#000,transparent)}
+.pe.on{opacity:1}
+:root[data-style="flat"] .edge,:root[data-style="flat"] .pe{-webkit-backdrop-filter:none;backdrop-filter:none}
 .kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .demo{font-size:12.5px;color:var(--mute);margin:2px 2px 6px}
 .net{font-size:12.5px;color:var(--over);margin:2px 2px 8px}
@@ -280,6 +292,7 @@ button.toggle.solo{background:var(--surf);border:1px solid var(--line);border-ra
 </style>
 
 <div id="wp"></div><div id="wpd"></div>
+<div class="edge" id="edgeT"></div><div class="edge" id="edgeB"></div>
 <div id="app">
   <header><h1 id="ht">Главная</h1><button class="ib" id="hs" data-a="search" aria-label="Поиск" hidden><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></header>
   <main id="view"></main>
@@ -396,7 +409,7 @@ const isOver=o=>!o.paid&&pd(o)<today();
 const termsSorted=()=>[...S.terms].sort((a,b)=>a.days-b.days);
 
 /* ---------- состояние интерфейса ---------- */
-const ui={tab:'home',home:{per:'',mode:'day',cur:today(),st:'',sup:'',q:'',sort:'date',stat:null,payOpen:false},pay:{cat:'unpaid',per:'week',shown:10},cal:{mode:'month',cur:today(),sel:today(),hidePaid:false},sup:{q:''},nedit:false,more:null,logq:'',logn:50};
+const ui={tab:'home',home:{per:'',mode:'day',cur:today(),st:'',sup:'',q:'',sort:'date',stat:null},pay:{cat:'unpaid',per:'week',shown:10},cal:{mode:'month',cur:today(),sel:today(),hidePaid:false},sup:{q:''},nedit:false,more:null,logq:'',logn:50};
 let pend=null;
 
 /* ---------- иконки: один набор, контур 1.5, скругления ---------- */
@@ -472,11 +485,9 @@ function homeFilter(){
   const due=l.filter(o=>!o.paid&&!isOver(o)&&pd(o)>=a&&pd(o)<=b).sort((x,y)=>pd(x).localeCompare(pd(y)));
   return{l:l.filter(o=>o.date>=a&&o.date<=b).sort(cmp),over,pay:due};
 }
-function payCards(pay,nOver){
+function payCards(pay){
   if(!pay.length)return '<div class="empty">Платежей на этот период нет</div>';
-  const full=Math.max(nOver,1);
-  if(ui.home.payOpen||pay.length<=full)return `<div class="cards">${pay.map(orderRow).join('')}</div>`+(pay.length>full?'<div class="expb"><button class="expbtn" data-a="payToggle">Свернуть</button></div>':'');
-  return `<div class="cards">${pay.slice(0,full).map(orderRow).join('')}</div><div class="peek">${orderRow(pay[full])}</div><div class="expb"><button class="expbtn" data-a="payToggle">Ещё ${pay.length-full}</button></div>`}
+  return `<div class="cards">${pay.map(orderRow).join('')}</div>`}
 function homeList(){
   const{l}=homeFilter(),h=ui.home;let s='';
   if(h.per==='stat')s+=`<div class="chips"><button class="chip on" data-a="clearstat">Показ: ${h.stat==='next7'?'платежи на 7 дней':{prep:'подготовленные',ord:'заказанные',unpaid:'неоплаченные',paid:'оплаченные'}[h.stat]+' за '+MN[+today().slice(5,7)-1].toLowerCase()} ✕</button></div>`;
@@ -491,7 +502,7 @@ function vHome(){
   const tiles=`<div class="strip">${R.map(r=>`<button class="tile ${h.per==='stat'&&h.stat===r[0]?'on':''}" data-a="stat" data-v="${r[0]}"><small><i style="--c:var(--${r[4]})"></i>${r[1]}</small><b>${r[2]}</b>${r[3]?`<em>${r[3]}</em>`:''}</button>`).join('')}</div>`;
   const nav=`${segp([['day','День'],['week','Неделя'],['month','Месяц']],h.mode,'hmode')}<div class="calnav"><button data-a="hprev" aria-label="Назад">${svg('prev')}</button><label>${hLabel()}<input type="date" id="hjump" value="${h.cur}"></label><button data-a="hnext" aria-label="Вперёд"><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)">${IC.prev}</svg></button></div>`;
   const payBlock=h.per==='stat'?'':`<div class="sech"><h2>Оплаты <span>${pay.length} шт.</span></h2></div>
-  <div class="sumline">К оплате: <b>${nf(pay.reduce((a,o)=>a+o.amount,0))} ₽</b></div>${payCards(pay,hf.over.length)}`;
+  <div class="sumline">К оплате: <b>${nf(pay.reduce((a,o)=>a+o.amount,0))} ₽</b></div>${payCards(pay)}`;
   return `${REMOTE&&!netOk?'<div class="net">Нет связи с сервером, изменения отправятся позже</div>':''}${nav}
   <div class="sech" style="margin-top:12px"><h2>Заказы <span>${hf.l.length} шт.</span></h2></div>
   <div id="hl">${homeList()}</div>${payBlock}<button class="fab" data-a="newOrder" aria-label="Создать заказ">${svg('plus')}</button>`}
@@ -606,11 +617,12 @@ function render(){
   $('#nav').className='';$('#nav').innerHTML=TABS.map(t=>`<button class="${ui.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${svg(t[0])}${t[1]}${t[0]==='pay'&&ORD().some(isOver)?'<i class="dot"></i>':''}</button>`).join('');
   $('#ht').textContent=ui.tab==='more'?(TITLES[ui.more]||'Настройки'):{home:'Главная',pay:'Оплаты',cal:'Календарь'}[ui.tab];$('#hs').hidden=ui.tab!=='home';
   if(ui.tab==='more'&&ui.more==='botwp')applyBotPrev();
-  if(ui.tab==='more'&&ui.more==='look'){const pv=$('#wpprev');if(pv)pv.style.backgroundImage=WP?'url("'+WP+'")':''}}
+  if(ui.tab==='more'&&ui.more==='look'){const pv=$('#wpprev');if(pv)pv.style.backgroundImage=WP?'url("'+WP+'")':''}
+  requestAnimationFrame(updEdges)}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
 const fit=t=>{t.style.height='auto';t.style.height=Math.max(46,t.scrollHeight+2)+'px'};
-function sheet(html){$('#panel').innerHTML=html;$('#sheet').hidden=false;document.body.classList.add('lock');$('#panel').querySelectorAll('textarea').forEach(fit)}
-function closeSheet(){$('#sheet').hidden=true;document.body.classList.remove('lock');pend=null;$('#panel').dataset.o='';closeMenu();if(dirty)render()}
+function sheet(html){$('#panel').innerHTML='<i class="pe t"></i>'+html+'<i class="pe b"></i>';requestAnimationFrame(updEdges);$('#sheet').hidden=false;document.body.classList.add('lock');$('#panel').querySelectorAll('textarea').forEach(fit)}
+function closeSheet(){requestAnimationFrame(updEdges);$('#sheet').hidden=true;document.body.classList.remove('lock');pend=null;$('#panel').dataset.o='';closeMenu();if(dirty)render()}
 function ask(msg,yes,fn,o={}){pend=fn;sheet(`<h3>${esc(msg)}</h3>${o.sub?`<p class="mute" style="margin:0">${esc(o.sub)}</p>`:''}<div class="bar"><button class="btn quiet" data-a="close">Отмена</button><button class="btn ${o.danger?'dfill':'on'}" data-a="yes">${yes}</button></div>`)}
 const askDel=(fn,sub)=>ask('Удалить навсегда?','Удалить',fn,{danger:true,sub:'Это нельзя отменить.'+(sub?' '+sub:'')});
 
@@ -644,7 +656,7 @@ function orderForm(id){
   <div class="two"><div class="f"><span>Срок оплаты *</span>${pickF('f-term',termOpts(),tsel)}</div><label class="f" id="f-dw" hidden><span>Дата оплаты</span><input class="inp" type="date" id="f-date" value="${cdate}"></label></div>
   <div class="mute sm" style="margin-top:8px">Оплатить до: <b id="f-pd"></b></div>
   <label class="f"><span>Комментарий</span><textarea id="f-cm">${esc(o?.comment||'')}</textarea></label>
-  <label class="f"><span>Счёт или вложение</span><input class="inp" type="file" id="f-files"></label>
+  <div class="f"><span>Вложение</span><div class="fpick"><label class="btn quiet" id="fp-l"><span id="fp-n">Выберите файл</span><input type="file" id="f-files" hidden></label><button type="button" class="fx2" id="fp-x" data-a="fpClear" aria-label="Убрать выбор" hidden>✕</button></div></div>
   ${o?'':`<button class="toggle solo" data-a="fchk" data-v="ord"><span>Сразу заказан</span><i class="sw" id="f-ord"></i></button><button class="toggle solo" data-a="fchk" data-v="paid" style="margin-top:8px"><span>Сразу оплачен</span><i class="sw" id="f-paid"></i></button>`}
   <div class="bar" style="margin-top:16px"><button class="btn quiet" data-a="close">Отмена</button><button class="btn on" id="f-save" data-a="saveOrder" data-id="${o?o.id:''}">${o?'Сохранить':'Создать'}</button></div><div id="f-err" style="color:var(--over);font-size:13px"></div>`);
   updPd()}
@@ -733,7 +745,6 @@ const A={
   fileDel:(v,d)=>ask('Убрать вложение в корзину?','В корзину',()=>{const o=S.orders.find(x=>x.id===d.id);if(!o||!o.file)return;const f=Object.assign({},o.file,{up:o.file.up||o.date});setSettings({trash:[...S.settings.trash,{id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:f,at:today()}]});o.file=null;touch(o,['вложение в корзине']);openOrder(o.id);toast('Вложение в корзине на 14 дней')},{}),
   stat:v=>{const h=ui.home;h.per='stat';h.stat=v;h.st='';h.sup='';h.q='';render()},
   clearstat:()=>{ui.home.per='';render()},
-  payToggle:()=>{ui.home.payOpen=!ui.home.payOpen;render()},
   hmode:v=>{ui.home.mode=v;ui.home.per='';render()},
   hprev:()=>shiftHome(-1),hnext:()=>shiftHome(1),
   pcat:v=>{ui.pay.cat=v;ui.pay.shown=10;render()},pper:v=>{ui.pay.per=v;ui.pay.shown=10;render()},more10:()=>{ui.pay.shown+=10;$('#pl').innerHTML=payList()},
@@ -749,6 +760,7 @@ const A={
   supRestore:(v,d)=>{const s=supOf(d.id);delete s.arch;upsert('sup',s);render()},
   smPrev:()=>{const m=ui.sm||today().slice(0,7);const d=new Date(+m.slice(0,4),+m.slice(5,7)-2,1);ui.sm=fD(d).slice(0,7);render()},
   smNext:()=>{const cur=today().slice(0,7),m=ui.sm||cur;if(m>=cur)return;const d=new Date(+m.slice(0,4),+m.slice(5,7),1);ui.sm=fD(d).slice(0,7);render()},
+  fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
   botDef:()=>{BOT.mode='default';BOT.url='';pushBot(true);botImg()},
   botOff:()=>{BOT.mode='none';BOT.url='';pushBot(true);botImg()},
@@ -803,6 +815,7 @@ document.addEventListener('input',e=>{const t=e.target;
   else if(t.id==='ntime'&&/^\d\d:\d\d$/.test(t.value))setSettings({time:t.value})
   else if(['f-od','f-date'].includes(t.id))updPd()});
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='f-files'){const f=t.files[0];$('#fp-n').textContent=f?f.name:'Выберите файл';$('#fp-x').hidden=!f;return}
   if(t.id==='botfile'&&t.files[0]){botPhoto(t.files[0]);t.value='';return}
   if(t.id==='wpfile'&&t.files[0]){wpPrep(t.files[0]).then(async d=>{WP=d;UI.wpOff=false;lsSet('zakazy-ui',UI);const ok=await wpSave(d);applyWp();wpLum();toast(ok?'Обои установлены':'Обои установлены до закрытия, сохранить не удалось')}).catch(()=>toast('Не удалось открыть фото'));t.value='';return}
   if(t.id==='hjump'&&t.value){ui.home.cur=t.value;ui.home.per='';render()}
@@ -860,6 +873,11 @@ function applyWp(){const h=document.documentElement,w=$('#wp'),d=$('#wpd');h.cla
   if(WP){w.style.backgroundImage='url("'+WP+'")';w.style.filter='blur('+UI.wpBlur+'px)';}
   tintWp();const pv=$('#wpprev');if(pv){pv.style.backgroundImage=WP?'url("'+WP+'")':'';pv.textContent=WP?'':'Без обоев'}}
 wpLoad().then(v=>{WP=v||(UI.wpOff?null:DEFW);wpReady=true;applyWp();wpLum();initSync();botImg();if(ui.tab==='more'&&ui.more==='look'&&$('#sheet').hidden)render()});
+function updEdges(){const de=document.documentElement,y=scrollY,max=de.scrollHeight-innerHeight,lk=document.body.classList.contains('lock');
+  $('#edgeT').classList.toggle('on',!lk&&y>4);$('#edgeB').classList.toggle('on',!lk&&y<max-4);
+  const nv=$('nav');if(nv)$('#edgeB').style.bottom=Math.max(0,innerHeight-nv.getBoundingClientRect().top)+'px';
+  if(!$('#sheet').hidden){const pn=$('#panel'),t=pn.querySelector('.pe.t'),b=pn.querySelector('.pe.b');if(t)t.classList.toggle('on',pn.scrollTop>3);if(b)b.classList.toggle('on',pn.scrollTop+pn.clientHeight<pn.scrollHeight-3)}}
+addEventListener('scroll',updEdges,{passive:true,capture:true});addEventListener('resize',updEdges);
 let DR=null;
 const dtEls=()=>[...document.querySelectorAll('#dgrid .dt')];
 document.addEventListener('pointerdown',e=>{const el=e.target.closest('.dgrid.edit .dt');if(!el||e.target.closest('.dx'))return;const els=dtEls(),slots=els.map(x=>({x:x.offsetLeft,y:x.offsetTop,w:x.offsetWidth,h:x.offsetHeight}));
