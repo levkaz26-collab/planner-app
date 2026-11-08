@@ -50,7 +50,8 @@
 :root[data-style="flat"][data-theme]{--bg:var(--bgf)}
 @media (prefers-color-scheme:dark){:root[data-style="flat"]:not([data-theme="light"]){--bg:var(--bgf)}}
 
-#wp,#wpd{position:fixed;inset:-50px;z-index:-1;display:none;background-size:cover;background-position:center}
+#wp,#wpd{position:fixed;inset:0;z-index:-1;display:none;overflow:hidden}
+#wp:before{content:"";position:absolute;inset:-50px;background:var(--wpimg) center/cover no-repeat;filter:blur(var(--wpblur,0px))}
 #wpd{inset:0}
 html.haswp #wp,html.haswp #wpd{display:block}
 html.haswp #wpd{background:linear-gradient(var(--auto,transparent),var(--auto,transparent)),rgba(0,0,0,var(--dim))}
@@ -68,14 +69,14 @@ html.haswp[data-wl="light"] :is(header h1,main h2,main h2 span,.sumline,.sumline
 input[type=range]{width:100%;accent-color:var(--blue);margin:6px 0 2px}
 .rl{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-top:12px}
 *{box-sizing:border-box}
-html{background:var(--bg)}
+html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background-color:var(--bg);background-image:linear-gradient(rgba(0,0,0,var(--dim)),rgba(0,0,0,var(--dim))),radial-gradient(62% 34% at 4% 24%,var(--bg1),transparent 78%),radial-gradient(56% 34% at 100% 50%,var(--bg2),transparent 78%),radial-gradient(62% 30% at 8% 80%,var(--bg3),transparent 78%),radial-gradient(46% 22% at 92% 6%,var(--bg3),transparent 78%),radial-gradient(40% 20% at 96% 94%,var(--bg1),transparent 78%);background-attachment:fixed;color:var(--ink);font:15px/1.4 var(--sans);overflow-wrap:anywhere;padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0;text-align:left}
 button:focus-visible,a:focus-visible,.inp:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 [hidden]{display:none!important}
 body.lock{overflow:hidden}
-#app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+#app{max-width:560px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:22px 0 10px}
 header h1{font-size:28px;line-height:1.15;font-weight:700;margin:0;letter-spacing:-.01em}
 main{flex:1;padding:2px 0 150px}
@@ -129,8 +130,6 @@ h2 span{font-size:14px;font-weight:400;color:var(--mute)}
 .st.ord:before{background:var(--s-ord)} .st.paid:before{background:var(--s-paid)} .st.over{color:var(--over)} .st.over:before{background:var(--s-over)}
 .sumline{display:flex;gap:8px;align-items:baseline;margin:0 2px 12px;color:var(--mute)}
 .sumline b{color:var(--ink);font-size:19px}
-.sum{display:flex;justify-content:space-between;gap:10px;padding:11px 15px;background:var(--surf);border:1px solid var(--line);border-radius:16px;font-size:15px;font-weight:600;margin-bottom:12px;box-shadow:var(--edge)}
-.sum span:first-child{color:var(--mute);font-weight:400}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .chip{border:1px solid var(--line);padding:8px 14px;font-size:14px;font-weight:500;background:var(--surf);color:var(--mute);border-radius:999px;position:relative;box-shadow:var(--edge)}
 .chip.on{background:var(--blue2);border-color:var(--blueline);color:var(--ink)}
@@ -164,7 +163,7 @@ textarea{resize:none;min-height:46px;overflow:hidden;display:block;line-height:1
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .scrim{position:absolute;inset:0;background:var(--scrim)}
-.panel{position:relative;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:0;box-shadow:var(--edge);padding:22px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+.panel{position:relative;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:0;box-shadow:var(--edge);padding:22px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
 .panel h3{font-size:22px;font-weight:700;margin:0 0 8px}
 .panel h2{font-size:17px;margin:22px 0 10px}
 .kv{display:grid;grid-template-columns:112px 1fr;gap:9px 12px;margin:14px 0;font-size:15px}
@@ -298,6 +297,16 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .vbar{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px));color:#e8ebf2;pointer-events:none}
 .vbar .btn{pointer-events:auto;color:#fff}
 .vname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.gh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mute)}
+.gh b{color:var(--ink);font-weight:600}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.dlgw{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden}
+.dlgbg{position:absolute;inset:0;background:var(--scrim)}
+.dlgc{position:relative;width:100%;max-width:340px;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--edge),var(--fx)}
+.dlgc h3{margin:0 0 8px;font-size:20px;font-weight:700}
+.dlgc p{margin:0 0 16px;color:var(--mute);font-size:14.5px;line-height:1.45}
+.dlgb{display:flex;flex-direction:column;gap:8px}
 .kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .demo{font-size:12.5px;color:var(--mute);margin:2px 2px 6px}
 .net{font-size:12.5px;color:var(--over);margin:2px 2px 8px}
@@ -314,6 +323,7 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 </div>
 <div class="sheet" id="sheet" hidden><div class="scrim" data-a="close"></div><div class="panel" id="panel"></div></div>
 <div class="toast" id="toast" hidden></div>
+<div class="dlgw" id="dlgw" hidden><div class="dlgbg" data-a="dlgclose"></div><div class="dlgc" id="dlgc"></div></div>
 <div class="viewer" id="viewer" hidden><div class="vbg" data-a="vclose"></div><button class="vx" data-a="vclose" aria-label="Закрыть"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="vbox" id="vbox"></div><div class="vbar" id="vbar"></div></div>
 
 <script>
@@ -449,7 +459,7 @@ const isOver=o=>!o.paid&&pd(o)<today();
 const termsSorted=()=>[...S.terms].sort((a,b)=>a.days-b.days);
 
 /* ---------- состояние интерфейса ---------- */
-const ui={tab:'home',home:{per:'',mode:'day',cur:today(),st:'',sup:'',q:'',sort:'date',stat:null},pay:{cat:'unpaid',per:'week',shown:10},cal:{mode:'month',cur:today(),sel:today(),hidePaid:false},sup:{q:''},nedit:false,more:null,logq:'',logn:50};
+const ui={tab:'home',home:{per:'',mode:'day',cur:today(),st:'',sup:'',q:'',sort:'date',stat:null},pay:{cat:'unpaid',per:'all',page:0},cal:{mode:'month',cur:today(),sel:today(),hidePaid:false},sup:{q:''},nedit:false,more:null,logq:'',logn:50};
 let pend=null;
 
 /* ---------- иконки: один набор, контур 1.5, скругления ---------- */
@@ -463,7 +473,7 @@ const IC={
   terms:'<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
   log:'<rect x="5" y="4" width="14" height="16" rx="3"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/>',
   trash:'<path d="M5 7.5h14M9.5 7.5V5.5h5v2M7 7.5l.8 11a1 1 0 001 .9h6.4a1 1 0 001-.9l.8-11"/><path d="M10 11v5M14 11v5"/>',
-  look:'<path d="M20 4L13.4 11.3"/><path d="M13.4 11.3C10.6 10.4 7 11.2 4.6 13.4 3.2 14.7 3 16.6 3.9 18.2c.9 1.6 2.7 2.4 4.6 1.9 3.1-.8 5.2-3.9 4.9-8.8z"/>',
+  look:'<path d="M10.9 11.9L16.49 6.31A1.48 1.48 0 0 1 18.59 8.41L13 14"/><path d="M4 16.6C5.4 16.5 6 15.9 6.1 14.9A3.45 3.45 0 1 1 8.9 18.6C7 18.7 5.2 18 4 16.6Z"/>',
   users:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c.5-3.6 3.4-5.5 7-5.5s6.5 1.9 7 5.5"/>',
   stats:'<path d="M5 19v-7M12 19V5M19 19v-10"/>',
   botwp:'<rect x="4" y="5" width="16" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4.5"/>',
@@ -496,7 +506,6 @@ const pickF=(id,opts,val,attr='')=>{const cur=opts.find(o=>o[0]===val)||opts[0];
 function openMenu(el,html,list){const m=document.createElement('div');m.className='menu'+(list?' list':'');m.id='menu';m.setAttribute('role','menu');m.innerHTML=html;document.body.appendChild(m);
   const r=el.getBoundingClientRect();m.style.minWidth=Math.min(r.width,innerWidth-24)+'px';const w=m.offsetWidth,h=m.offsetHeight;
   let x=Math.max(12,Math.min(r.left,innerWidth-w-12)),y=r.bottom+6;if(y+h>innerHeight-20)y=Math.max(12,r.top-h-6);m.style.left=x+'px';m.style.top=y+'px';return m}
-const sumNote=l=>`<div class="sum"><span>Заказов: ${l.length}</span><span>${rub(l.reduce((a,o)=>a+o.amount,0))}</span></div>`;
 const segp=(arr,cur,a)=>`<div class="segp" style="grid-template-columns:repeat(${arr.length},1fr)">${arr.map(x=>`<button class="${cur===x[0]?'on':''}" data-a="${a}" data-v="${x[0]}">${x[1]}${x[2]?'<i class="dot2"></i>':''}</button>`).join('')}</div>`;
 const chips=(arr,cur,a)=>`<div class="chips">${arr.map(c=>`<button class="chip ${cur===c[0]?'on':''}" data-a="${a}" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>`;
 const monday=s=>{const d=toD(s);return addD(s,-((d.getDay()+6)%7))};
@@ -522,8 +531,8 @@ function homeFilter(){
     return{l:l.sort(cmp),over:[],pay:[]};
   }
   const[a,b]=hRange();
-  const over=l.filter(isOver).sort((x,y)=>pd(x).localeCompare(pd(y)));
-  const due=l.filter(o=>!o.paid&&!isOver(o)&&pd(o)>=a&&pd(o)<=b).sort((x,y)=>pd(x).localeCompare(pd(y)));
+  const over=l.filter(o=>isOver(o)&&o.ordered).sort((x,y)=>pd(x).localeCompare(pd(y)));
+  const due=l.filter(o=>!o.paid&&o.ordered&&!isOver(o)&&pd(o)>=a&&pd(o)<=b).sort((x,y)=>(tDays(x)===0?0:1)-(tDays(y)===0?0:1)||pd(x).localeCompare(pd(y)));
   return{l:l.filter(o=>o.date>=a&&o.date<=b).sort(cmp),over,pay:due};
 }
 function payCards(pay){
@@ -548,16 +557,23 @@ function vHome(){
 function payList(){
   const p=ui.pay,T=today(),L=ORD();
   const [ra,rb]=p.per==='week'?[monday(T),addD(monday(T),6)]:p.per==='month'?[T.slice(0,7)+'-01',fD(new Date(+T.slice(0,4),+T.slice(5,7),0))]:['0000','9999'];
-  const inR=x=>x>=ra&&x<=rb;
-  let l;
-  if(p.cat==='unpaid')l=L.filter(o=>!o.paid&&(inR(pd(o))||isOver(o)));
-  else if(p.cat==='over')l=L.filter(o=>isOver(o)&&inR(pd(o)));
-  else l=L.filter(o=>o.paid&&inR(o.date));
-  l.sort((a,b)=>pd(a).localeCompare(pd(b)));if(p.cat==='paid')l.reverse();
-  return (l.length?sumNote(l):'')+`<div class="cards">${l.slice(0,p.shown).map(orderRow).join('')||'<div class="empty">Здесь пока ничего нет</div>'}</div>`+(l.length>p.shown?`<div class="bar"><button class="btn quiet wide" data-a="more10">Далее (ещё ${Math.min(10,l.length-p.shown)})</button></div>`:'')}
+  const inR=x=>x>=ra&&x<=rb,byPd=(a,b)=>pd(a).localeCompare(pd(b))||a.date.localeCompare(b.date),rows=[];
+  if(p.cat==='unpaid'){
+    const base=L.filter(o=>!o.paid&&o.ordered);
+    base.filter(isOver).sort(byPd).forEach(o=>rows.push({o}));
+    base.filter(o=>!isOver(o)&&tDays(o)===0).sort(byPd).forEach(o=>rows.push({o}));
+    const rest=base.filter(o=>!isOver(o)&&tDays(o)>0&&inR(pd(o))).sort(byPd),gs={};
+    rest.forEach(o=>{gs[pd(o)]=(gs[pd(o)]||0)+o.amount});
+    rest.forEach(o=>rows.push({o,g:pd(o),gs:gs[pd(o)]}));
+  }else L.filter(o=>o.paid&&inR(o.date)).sort((a,b)=>pd(b).localeCompare(pd(a))||b.date.localeCompare(a.date)).forEach(o=>rows.push({o}));
+  const M=rows.length,PS=10,pages=Math.max(1,Math.ceil(M/PS));if(p.page>=pages)p.page=pages-1;if(p.page<0)p.page=0;
+  if(!M)return '<div class="empty">Нет оплат</div>';
+  let h='',last=null;
+  rows.slice(p.page*PS,p.page*PS+PS).forEach(r=>{if(r.g&&r.g!==last)h+=`<div class="gh"><span>${dm(r.g)}, ${wd(r.g)}</span><b>${nf(r.gs)} ₽</b></div>`;last=r.g||null;h+=orderRow(r.o)});
+  return `<div class="cards">${h}</div>`+(pages>1?`<div class="pager"><button class="btn quiet sm2" data-a="ppage" data-v="prev" ${p.page?'':'disabled'}>‹ Назад</button><span class="mute sm">${Math.min((p.page+1)*PS,M)} из ${M}</span><button class="btn quiet sm2" data-a="ppage" data-v="next" ${p.page<pages-1?'':'disabled'}>Далее ›</button></div>`:'')}
 function vPay(){const p=ui.pay;
-  return `${segp([['unpaid','Не оплачено'],['over','Просрочено',ORD().some(isOver)],['paid','Оплачено']],p.cat,'pcat')}
-  ${segp([['week','Неделя'],['month','Месяц'],['all','Все']],p.per,'pper')}<div id="pl" style="margin-top:12px">${payList()}</div>`}
+  return `${segp([['unpaid','К оплате',ORD().some(isOver)],['paid','Оплачено']],p.cat,'pcat')}
+  ${segp([['all','Все'],['week','Неделя'],['month','Месяц']],p.per,'pper')}<div id="pl" style="margin-top:12px">${payList()}</div>`}
 
 /* ---------- календарь ---------- */
 const skey=o=>isOver(o)?'over':stOf(o);
@@ -611,7 +627,7 @@ function vMore(){
   if(m==='botwp')return back+`
     <div class="f" style="margin-top:12px"><span>Тема бота</span></div>${segp([['dark','Тёмная'],['light','Светлая']],BOT.theme,'btheme')}
     ${botPrev()}
-    <div class="bar" style="margin:12px 0 0"><label class="btn quiet" style="cursor:pointer">Выбрать фото<input type="file" id="botfile" accept="image/*" hidden></label><button class="btn quiet" data-a="botDef">Тестовые горы</button><button class="btn quiet" data-a="botOff">Убрать обои</button></div>
+    <div class="bar" style="margin:12px 0 0"><label class="btn quiet" style="cursor:pointer">Выбрать фото<input type="file" id="botfile" accept="image/*" hidden></label><button class="btn quiet" data-a="botOff">Убрать обои</button></div>
     ${BOT.mode==='none'?`<div class="rl"><span>Цвет</span></div><input type="range" class="hue" id="bh" min="0" max="360" value="${BOT.hue}">`:''}
     <div class="rl"><span>Размытие обоев</span><span id="bbv">${BOT.blur}</span></div><input type="range" id="bb" min="0" max="30" value="${BOT.blur}">
     <div class="rl"><span>Затемнение</span><span id="bdv">${BOT.dim}%</span></div><input type="range" id="bd" min="0" max="70" value="${BOT.dim}">`;
@@ -741,15 +757,27 @@ const MAXSVG="<svg class=\"mxl\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"
 const lnk=(v,mk)=>{v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))return v;if(/^(t\.me|wa\.me|max\.ru)\//i.test(v))return 'https://'+v;return mk(v)};
 const tgUrl=v=>lnk(v,x=>/^[+\d][\d\s()+-]{5,}$/.test(x)?'https://t.me/+'+x.replace(/\D/g,''):'https://t.me/'+x.replace(/^@/,''));
 const waUrl=v=>lnk(v,x=>'https://wa.me/'+x.replace(/\D/g,''));
-const maxUrl=v=>lnk(v,x=>'https://max.ru/'+x.replace(/^@/,''));
+function normPhone(v){let d=String(v||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);else if(d.length===10)d='7'+d;return d.length>=11?d:''}
+const phTg=p=>p?'https://t.me/+'+p:'',phWa=p=>p?'https://wa.me/'+p:'';
+function normTg(v){v=(v||'').trim();if(/^@?[A-Za-z][A-Za-z0-9_]{3,}$/.test(v))return 'https://t.me/'+v.replace(/^@/,'');if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phTg(normPhone(v))||v;return v}
+function normWa(v){v=(v||'').trim();if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phWa(normPhone(v))||v;return v}
+const openExt=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(u);return}}catch(e){}window.open(u,'_blank','noopener')};
+function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).catch(fb)}catch(e){}fb();return Promise.resolve()}
+function openMax(num){copyText('+'+num).then(()=>toast('Номер скопирован'));let gone=false;const h=()=>{if(document.hidden)gone=true};document.addEventListener('visibilitychange',h);
+  const a=document.createElement('a');a.href='max://';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!gone)openExt('https://max.ru/')},800)}
+function showMaxDlg(p){$('#dlgc').innerHTML='<h3>Как написать в MAX</h3><p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение. MAX пока не поддерживает прямой переход в чат.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="maxMore">Узнать подробнее</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
+const closeDlg=()=>{$('#dlgw').hidden=true};
 function contactRow(s){
   const call=s.phones[0]?'tel:'+s.phones[0].replace(/[^\d+]/g,''):'';
-  const acts=[['Telegram',tgUrl(s.tg),'#2AABEE','<svg viewBox="0 0 24 24"><path fill="#fff" d="M21.5 4.5L2.9 11.7c-.8.3-.8 1.2 0 1.5l4.6 1.4 1.8 5.6c.2.6.9.7 1.3.3l2.6-2.4 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3zM9.6 14.2l8.6-5.4-6.9 6.6-.3 3.1-1.4-4.3z"/></svg>'],
-    ['WhatsApp',waUrl(s.wa),'#25D366','<svg viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 00-7.6 13.2L3.2 20.8l4.5-1.2A8.8 8.8 0 1012 3.2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path fill="#fff" d="M9 8.5c0 3.5 3 6.5 6.500 6.500l1-1.500-2-1-1 .8c-1-.4-1.900-1.300-2.300-2.300l.8-1-1-2z"/></svg>'],
-    ['MAX',maxUrl(s.max),'',MAXSVG],
+  const p1=normPhone(s.phones[0]);
+  const acts=[['Telegram',tgUrl(s.tg)||phTg(p1),'#2AABEE','<svg viewBox="0 0 24 24"><path fill="#fff" d="M21.5 4.5L2.9 11.7c-.8.3-.8 1.2 0 1.5l4.6 1.4 1.8 5.6c.2.6.9.7 1.3.3l2.6-2.4 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3zM9.6 14.2l8.6-5.4-6.9 6.6-.3 3.1-1.4-4.3z"/></svg>'],
+    ['WhatsApp',waUrl(s.wa)||phWa(p1),'#25D366','<svg viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 00-7.6 13.2L3.2 20.8l4.5-1.2A8.8 8.8 0 1012 3.2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path fill="#fff" d="M9 8.5c0 3.5 3 6.5 6.500 6.500l1-1.500-2-1-1 .8c-1-.4-1.900-1.300-2.300-2.300l.8-1-1-2z"/></svg>'],
+    ['MAX',p1?'#max':'','',MAXSVG],
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
-    return x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+    return x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
 function supOpen(id){
   const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
@@ -761,7 +789,7 @@ function supForm(id){
   const s=id?supOf(id):null;
   sheet(`<h3>${s?'Изменить поставщика':'Новый поставщик'}</h3><label class="f"><span>Название *</span><input class="inp" id="s-n" value="${esc(s?.name||'')}"></label>
   <label class="f"><span>Телефоны, по одному в строке</span><textarea id="s-p">${esc((s?.phones||[]).join('\n'))}</textarea></label>
-  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}"></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}"></label><label class="f"><span>MAX</span><input class="inp" id="s-mx" value="${esc(s?.max||'')}"></label>
+  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><div class="f"><span>MAX</span><button type="button" class="btn quiet wide" data-a="maxForm">Скопировать номер и открыть MAX</button></div>
   <label class="f"><span>Почта</span><input class="inp" id="s-e" value="${esc(s?.email||'')}"></label>
   <label class="f"><span>Комментарий</span><textarea id="s-c">${esc(s?.comment||'')}</textarea></label>
   <div class="bar" style="margin-top:16px"><button class="btn quiet" data-a="close">Отмена</button><button class="btn on" data-a="supSave" data-id="${id||''}">Сохранить</button></div><div id="s-err" style="color:var(--over);font-size:13px"></div>`)}
@@ -797,17 +825,17 @@ const A={
   fileView:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);if(o&&o.file)openViewer(o.file)},
   trView:(v,d)=>{const i=S.settings.trash.find(x=>x.id===d.id);if(i)openViewer(i.file)},
   vclose:()=>closeViewer(),
-  vopen:(v,d)=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(d.u);return}}catch(e){}window.open(d.u,'_blank','noopener')},
+  vopen:(v,d)=>openExt(d.u),
   stat:v=>{const h=ui.home;h.per='stat';h.stat=v;h.st='';h.sup='';h.q='';render()},
   clearstat:()=>{ui.home.per='';render()},
   hmode:v=>{ui.home.mode=v;ui.home.per='';render()},
   hprev:()=>shiftHome(-1),hnext:()=>shiftHome(1),
-  pcat:v=>{ui.pay.cat=v;ui.pay.shown=10;render()},pper:v=>{ui.pay.per=v;ui.pay.shown=10;render()},more10:()=>{ui.pay.shown+=10;$('#pl').innerHTML=payList()},
+  pcat:v=>{ui.pay.cat=v;ui.pay.page=0;render()},pper:v=>{ui.pay.per=v;ui.pay.page=0;render()},ppage:v=>{ui.pay.page+=v==='next'?1:-1;$('#pl').innerHTML=payList()},
   cmode:v=>{ui.cal.mode=v;ui.cal.cur=ui.cal.sel;render()},chide:()=>{ui.cal.hidePaid=!ui.cal.hidePaid;render()},cday:v=>{ui.cal.sel=v;render()},
   cprev:()=>shiftCal(-1),cnext:()=>shiftCal(1),
   supOpen:(v,d)=>supOpen(d.id),supNew:()=>supForm(),supEdit:(v,d)=>supForm(d.id),
   supSave:(v,d)=>{const n=$('#s-n').value.trim();if(!n)return $('#s-err').textContent='Укажите название';
-    const f={name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:$('#s-tg').value.trim(),wa:$('#s-wa').value.trim(),max:$('#s-mx').value.trim(),comment:$('#s-c').value.trim()};
+    const f={name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:normTg($('#s-tg').value),wa:normWa($('#s-wa').value),max:d.id?(supOf(d.id).max||''):'',comment:$('#s-c').value.trim()};
     if(d.id){const so=supOf(d.id),ks=Object.keys(f).filter(k=>JSON.stringify(so[k])!==JSON.stringify(f[k]));Object.assign(so,f);if(ks.length)touchObj('sup',so,ks)}else upsert('sup',{id:nid(),...f});log('Поставщик сохранён · '+n);closeSheet();render();toast('Сохранено')},
   supDel:(v,d)=>{const s=supOf(d.id),has=S.orders.some(o=>o.sup===s.id);
     if(has)ask('У поставщика есть заказы. Отправить в архив?','В архив',()=>{s.arch=true;touchObj('sup',s,['arch']);log('Поставщик в архиве · '+s.name);render();toast('Поставщик в архиве')});
@@ -820,8 +848,12 @@ const A={
   smPrev:()=>{const m=ui.sm||today().slice(0,7);const d=new Date(+m.slice(0,4),+m.slice(5,7)-2,1);ui.sm=fD(d).slice(0,7);render()},
   smNext:()=>{const cur=today().slice(0,7),m=ui.sm||cur;if(m>=cur)return;const d=new Date(+m.slice(0,4),+m.slice(5,7),1);ui.sm=fD(d).slice(0,7);render()},
   fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
+  maxDlg:(v,d)=>showMaxDlg(d.p),
+  maxForm:()=>{const p=normPhone(($('#s-p').value.split('\n')[0]||''));if(!p)return toast('Сначала укажите телефон');showMaxDlg(p)},
+  maxGo:(v,d)=>{closeDlg();openMax(d.p)},
+  maxMore:()=>{closeDlg();openExt('https://max.ru/')},
+  dlgclose:()=>closeDlg(),
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
-  botDef:()=>{BOT.mode='default';BOT.url='';pushBot(true);botImg()},
   botOff:()=>{BOT.mode='none';BOT.url='';pushBot(true);botImg()},
   wpOff:()=>{WP=null;UI.wpOff=true;UI.wpUrl='';lsSet('zakazy-ui',UI);wpDel();wpLum();applyWp();render();toast('Обои убраны')},
   mback:()=>{ui.more=null;render()},msub:v=>{ui.more=v;render();scrollTo(0,0)},
@@ -861,8 +893,10 @@ document.addEventListener('scroll',e=>{if(!e.target.classList?.contains('strip')
 document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.closest('[data-a="stPick"],[data-a="pick"]'))closeMenu();const el=e.target.closest('[data-a]');if(!el)return;
   if(el.dataset.a==='open'&&e.target.closest('[data-a="stPick"]'))return;
   const f=A[el.dataset.a];if(f)f(el.dataset.v,el.dataset,el)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#viewer').hidden){closeViewer();return}if(document.getElementById('menu'))closeMenu();else if(!$('#sheet').hidden)closeSheet()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dlgw').hidden){closeDlg();return}if(!$('#viewer').hidden){closeViewer();return}if(document.getElementById('menu'))closeMenu();else if(!$('#sheet').hidden)closeSheet()}});
 document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='s-tg'||t.id==='s-wa')t.dataset.m='1';
+  if(t.id==='s-p'){const p1=normPhone((t.value.split('\n')[0]||'')),tg=$('#s-tg'),wa=$('#s-wa');if(tg&&!tg.dataset.m)tg.value=phTg(p1);if(wa&&!wa.dataset.m)wa.value=phWa(p1)}
   if(t.id==='bh'){BOT.hue=+t.value;applyBotPrev();pushBot();return}
   if(t.id==='bb'||t.id==='bd'){if(t.id==='bb'){BOT.blur=+t.value;$('#bbv').textContent=t.value}else{BOT.dim=+t.value;$('#bdv').textContent=t.value+'%'}applyBotPrev();pushBot();return}
   if(t.id==='wpb'){UI.wpBlur=+t.value;$('#wpbv').textContent=t.value;lsSet('zakazy-ui',UI);applyWp();return}
@@ -874,6 +908,8 @@ document.addEventListener('input',e=>{const t=e.target;
   else if(t.id==='ntime'&&/^\d\d:\d\d$/.test(t.value))setSettings({time:t.value})
   else if(['f-od','f-date'].includes(t.id))updPd()});
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='s-tg'){t.value=normTg(t.value);return}
+  if(t.id==='s-wa'){t.value=normWa(t.value);return}
   if(t.id==='f-files'){const f=t.files[0];$('#fp-n').textContent=f?f.name:'Выберите файл';$('#fp-x').hidden=!f;return}
   if(t.id==='botfile'&&t.files[0]){botPhoto(t.files[0]);t.value='';return}
   if(t.id==='wpfile'&&t.files[0]){wpPrep(t.files[0]).then(async d=>{WP=d;UI.wpOff=false;lsSet('zakazy-ui',UI);const ok=await wpSave(d);applyWp();wpLum();toast(ok?'Обои установлены':'Обои установлены до закрытия, сохранить не удалось')}).catch(()=>toast('Не удалось открыть фото'));t.value='';return}
@@ -933,7 +969,7 @@ function applyBotPrev(){const w=$('#bmw'),m=$('#bm'),b=$('#bmbg'),d=$('#bmd');if
   d.style.background=BOT.theme==='dark'?'rgba(6,8,12,'+(BOT.dim/100)+')':'rgba(244,246,250,'+(BOT.dim/100*.8)+')'}
 addEventListener('resize',()=>applyBotPrev());
 function applyWp(){const h=document.documentElement,w=$('#wp'),d=$('#wpd');h.classList.toggle('haswp',!!WP);
-  if(WP){w.style.backgroundImage='url("'+WP+'")';w.style.filter='blur('+UI.wpBlur+'px)';}
+  if(WP){w.style.setProperty('--wpimg','url("'+WP+'")');w.style.setProperty('--wpblur',UI.wpBlur+'px');}
   tintWp();const pv=$('#wpprev');if(pv){pv.style.backgroundImage=WP?'url("'+WP+'")':'';pv.textContent=WP?'':'Без обоев'}}
 wpLoad().then(v=>{WP=v||(UI.wpOff?null:DEFW);wpReady=true;applyWp();wpLum();initSync();botImg();if(ui.tab==='more'&&ui.more==='look'&&$('#sheet').hidden)render()});
 function updEdges(){const de=document.documentElement,y=scrollY,max=de.scrollHeight-innerHeight,lk=document.body.classList.contains('lock');
