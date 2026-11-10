@@ -307,6 +307,8 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .dlgc h3{margin:0 0 8px;font-size:20px;font-weight:700}
 .dlgc p{margin:0 0 16px;color:var(--ink);font-size:14.5px;line-height:1.45}
 .dlgb{display:flex;flex-direction:column;gap:8px}
+.deny{margin-top:28vh;text-align:center;padding:28px 18px;background:var(--surf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--edge),var(--fx);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);display:flex;flex-direction:column;gap:8px}
+.deny b{font-size:22px}.deny span{color:var(--mute)}
 .kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .demo{font-size:12.5px;color:var(--mute);margin:2px 2px 6px}
 .net{font-size:12.5px;color:var(--over);margin:2px 2px 8px}
@@ -378,7 +380,14 @@ let CONN=null;
 const REMOTE=!!(CONN&&CONN.k);
 const BASE=(()=>{if(!REMOTE)return '';let a=(CONN.api||'').replace(/api\.php.*$/,'');return a&&!a.endsWith('/')?a+'/':a})();
 const aurl=(a)=>`${BASE}api.php?k=${encodeURIComponent(CONN.k)}${a?'&a='+a:''}`;
-if(REMOTE){try{const s=document.createElement('script');s.src='https://telegram.org/js/telegram-web-app.js';s.onload=()=>{try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}};document.head.appendChild(s)}catch(e){}}
+let tgReady=!REMOTE;
+if(REMOTE){try{const s=document.createElement('script');s.src='https://telegram.org/js/telegram-web-app.js';s.onload=()=>{try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}tgReady=true;render()};s.onerror=()=>{tgReady=true;render()};document.head.appendChild(s)}catch(e){tgReady=true}}
+function tgUser(){try{const u=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user;return u&&u.id?u:null}catch(e){return null}}
+function accessDenied(){if(!REMOTE||!loaded||!tgReady)return false;const u=tgUser();if(!u)return false;
+  const us=S.settings.users;if(!Array.isArray(us)||!us.length)return false;
+  const al=Array.isArray(S.settings.allowed)?S.settings.allowed.map(String):[];if(al.includes(String(u.id)))return false;
+  const un=String(u.username||'').toLowerCase().replace(/^@/,'');
+  return !(un&&us.some(x=>x&&x.kind==='username'&&String(x.value).toLowerCase().replace(/^@/,'')===un))}
 
 /* ---------- данные в формате бота ---------- */
 const DEF_TERMS=()=>[{id:'t0',name:'По факту',days:0},{id:'t14',name:'Отсрочка 14 дней',days:14},{id:'t21',name:'Отсрочка 21 день',days:21}];
@@ -439,8 +448,8 @@ function mskAt(d){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Mosco
 async function pull(){if(!REMOTE||busy||queue.length)return;
   try{const v0=ver;const r=await fetch(aurl(''),{cache:'no-store'});if(!r.ok)throw 0;const s=await r.json();if(v0!==ver||busy||queue.length)return;const was=netOk;if(s.rev!==S.rev||!loaded||!was){adopt(s);netOk=true;softRender()}else netOk=true}
   catch(e){netOk=false;if(!loaded)loaded=true;softRender()}}
-function softRender(){if($('#sheet').hidden&&!document.getElementById('menu')&&!document.activeElement?.matches?.('input,textarea'))render();else dirty=true}
-function sweep(){if(!loaded)return;const T=today(),add=[];
+function softRender(){if(accessDenied()){render();return}if($('#sheet').hidden&&!document.getElementById('menu')&&!document.activeElement?.matches?.('input,textarea'))render();else dirty=true}
+function sweep(){if(!loaded||accessDenied())return;const T=today(),add=[];
   S.orders.forEach(o=>{if(!o.file)return;const up=o.file.up||o.date;if(diff(T,up)>=33){add.push({id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:Object.assign({},o.file,{up}),at:T});const nm=o.file.name;o.file=null;touch(o,['вложение перенесено в корзину'],['file']);log('Вложение перенесено в корзину · '+supName(o.sup)+' · '+nm)}});
   const del=S.settings.trash.filter(x=>diff(T,x.at)>=14).map(x=>x.id);
   if(add.length||del.length)listOp('trash',add,del)}
@@ -674,7 +683,11 @@ function logList(){
 /* ---------- отрисовка ---------- */
 function render(){
   dirty=false;
-  if(!loaded){$('#view').innerHTML='<div class="empty">Загрузка…</div>';return}
+  document.querySelector('nav').hidden=false;
+  if(!loaded||!tgReady){$('#view').innerHTML='<div class="empty">Загрузка…</div>';$('#nav').innerHTML='';return}
+  if(accessDenied()){
+    $('#panel').innerHTML='';$('#sheet').hidden=true;$('#vbox').innerHTML='';$('#vbar').innerHTML='';$('#viewer').hidden=true;$('#dlgc').innerHTML='';$('#dlgw').hidden=true;document.body.classList.remove('lock');
+    $('#nav').innerHTML='';document.querySelector('nav').hidden=true;$('#ht').textContent='';$('#hs').hidden=true;$('#view').innerHTML='<div class="deny"><b>Нет доступа</b><span>Обратитесь к администратору.</span></div>';return}
   $('#view').innerHTML={home:vHome,pay:vPay,cal:vCal,more:vMore}[ui.tab]();
   $('#nav').className='';$('#nav').innerHTML=TABS.map(t=>`<button class="${ui.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${svg(t[0])}${t[1]}${t[0]==='pay'&&ORD().some(isOver)?'<i class="dot"></i>':''}</button>`).join('');
   $('#ht').textContent=ui.tab==='more'?(TITLES[ui.more]||'Настройки'):{home:'Главная',pay:'Оплаты',cal:'Календарь'}[ui.tab];$('#hs').hidden=ui.tab!=='home';
@@ -949,7 +962,7 @@ function readBot(){const w=S.settings.wp,t=S.settings.theme;let ch=false;
 function pushBot(now){lsSet('zakazy-bot',BOT);if(!REMOTE||!loaded)return;clearTimeout(botT);botPend=true;
   const go=()=>{botPend=false;const v={theme:BOT.theme};if(BOT.mode!=='custom'||BOT.url){v.wp={mode:BOT.mode,blur:BOT.blur,dim:BOT.dim};if(BOT.mode==='custom')v.wp.url=BOT.url;if(BOT.mode==='none')v.wp.hue=BOT.hue}setSettings(v)};
   now?go():botT=setTimeout(go,700)}
-function initSync(){if(!REMOTE||!loaded)return;if(!didInit){didInit=true;if(S.settings.wp&&S.settings.theme)readBot();else pushBot(true);botImg()}else if(!botPend)readBot()}
+function initSync(){if(!REMOTE||!loaded||accessDenied())return;if(!didInit){didInit=true;if(S.settings.wp&&S.settings.theme)readBot();else pushBot(true);botImg()}else if(!botPend)readBot()}
 async function botPhoto(file){try{const d=await wpPrep(file,.85);BOTIMG=d;BOT.mode='custom';BOT.url='';await wpSave(d,'bot');lsSet('zakazy-bot',BOT);render();
     if(REMOTE){const bin=atob(d.split(',')[1]),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);const u=await upload(new File([a],'bot-wallpaper.jpg',{type:'image/jpeg'}));BOT.url=u.url||'';pushBot(true)}}catch(e){toast('Не удалось загрузить фото')}}
 const WDF=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],MP=['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
