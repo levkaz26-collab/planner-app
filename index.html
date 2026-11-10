@@ -305,7 +305,7 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .dlgbg{position:absolute;inset:0;background:var(--scrim)}
 .dlgc{position:relative;width:100%;max-width:340px;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--edge),var(--fx)}
 .dlgc h3{margin:0 0 8px;font-size:20px;font-weight:700}
-.dlgc p{margin:0 0 16px;color:var(--mute);font-size:14.5px;line-height:1.45}
+.dlgc p{margin:0 0 16px;color:var(--ink);font-size:14.5px;line-height:1.45}
 .dlgb{display:flex;flex-direction:column;gap:8px}
 .kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .demo{font-size:12.5px;color:var(--mute);margin:2px 2px 6px}
@@ -757,6 +757,12 @@ const MAXSVG="<svg class=\"mxl\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"
 const lnk=(v,mk)=>{v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))return v;if(/^(t\.me|wa\.me|max\.ru)\//i.test(v))return 'https://'+v;return mk(v)};
 const tgUrl=v=>lnk(v,x=>/^[+\d][\d\s()+-]{5,}$/.test(x)?'https://t.me/+'+x.replace(/\D/g,''):'https://t.me/'+x.replace(/^@/,''));
 const waUrl=v=>lnk(v,x=>'https://wa.me/'+x.replace(/\D/g,''));
+const supTermLab=s=>!s||!s.term?'':s.term==='custom'?(+s.days||0)+' '+dn(+s.days||0):(termOf(s.term)?.name||'');
+function supTermOpts(){return[['','Не задан'],...termsSorted().map(t=>[t.id,t.name]),['custom','Другой срок']]}
+function setPickVal(id,v){const inp=$('#'+id),b=document.querySelector('[data-a="pick"][data-for="'+id+'"]');if(!inp||!b)return;const opts=JSON.parse(b.dataset.opts),o=opts.find(x=>x[0]===v);if(!o)return;inp.value=v;b.textContent=o[1];b.classList.toggle('ph',v==='')}
+function applySupTerm(sid){const s=supOf(sid);if(!s||!s.term)return;
+  if(s.term==='custom'){const dd=Math.max(0,+s.days||0);setPickVal('f-term','custom');const od=$('#f-od').value;if(od&&$('#f-date'))$('#f-date').value=addD(od,dd)}
+  else if(termOf(s.term))setPickVal('f-term',s.term);else return;updPd()}
 function normPhone(v){let d=String(v||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);else if(d.length===10)d='7'+d;return d.length>=11?d:''}
 const phTg=p=>p?'https://t.me/+'+p:'',phWa=p=>p?'https://wa.me/'+p:'';
 function normTg(v){v=(v||'').trim();if(/^@?[A-Za-z][A-Za-z0-9_]{3,}$/.test(v))return 'https://t.me/'+v.replace(/^@/,'');if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phTg(normPhone(v))||v;return v}
@@ -767,7 +773,7 @@ function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.
 function openMax(num){copyText('+'+num).then(()=>toast('Номер скопирован'));let gone=false;const h=()=>{if(document.hidden)gone=true};document.addEventListener('visibilitychange',h);
   const a=document.createElement('a');a.href='max://';document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!gone)openExt('https://max.ru/')},800)}
-function showMaxDlg(p){$('#dlgc').innerHTML='<h3>Как написать в MAX</h3><p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение. MAX пока не поддерживает прямой переход в чат.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="maxMore">Узнать подробнее</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
+function showMaxDlg(p){$('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
 const closeDlg=()=>{$('#dlgw').hidden=true};
 function contactRow(s){
   const call=s.phones[0]?'tel:'+s.phones[0].replace(/[^\d+]/g,''):'';
@@ -782,14 +788,15 @@ function supOpen(id){
   const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
   sheet(`<h3>${esc(s.name)}</h3>${s.arch?'<div class="mute sm">В архиве</div>':''}
-  ${contactRow(s)}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}${s.comment?`<p class="mute">${esc(s.comment)}</p>`:''}
+  ${contactRow(s)}${supTermLab(s)?`<div class="file"><span>Срок оплаты: <b>${esc(supTermLab(s))}</b></span></div>`:''}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}${s.comment?`<p class="mute">${esc(s.comment)}</p>`:''}
   <h2>Заказы <span>${os.length}</span></h2><div class="cards">${os.map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>
   <div class="bar" style="margin-top:18px"><button class="btn" data-a="supEdit" data-id="${id}">Изменить</button><button class="btn quiet" data-a="supDel" data-id="${id}">${os.length?'В архив':'Удалить'}</button><button class="btn quiet" data-a="close">Закрыть</button></div>`)}
 function supForm(id){
   const s=id?supOf(id):null;
   sheet(`<h3>${s?'Изменить поставщика':'Новый поставщик'}</h3><label class="f"><span>Название *</span><input class="inp" id="s-n" value="${esc(s?.name||'')}"></label>
   <label class="f"><span>Телефоны, по одному в строке</span><textarea id="s-p">${esc((s?.phones||[]).join('\n'))}</textarea></label>
-  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><div class="f"><span>MAX</span><button type="button" class="btn quiet wide" data-a="maxForm">Скопировать номер и открыть MAX</button></div>
+  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><div class="f"><span>Срок оплаты по умолчанию</span>${pickF('s-term',supTermOpts(),s&&s.term||'')}</div><label class="f" id="s-dw" ${s&&s.term==='custom'?'':'hidden'}><span>Дней</span><input class="inp" id="s-days" type="number" min="0" max="365" inputmode="numeric" value="${s&&s.term==='custom'?(+s.days||0):''}"></label>
+  <div class="f"><span>MAX</span><button type="button" class="btn quiet wide" data-a="maxForm">Скопировать номер и открыть MAX</button></div>
   <label class="f"><span>Почта</span><input class="inp" id="s-e" value="${esc(s?.email||'')}"></label>
   <label class="f"><span>Комментарий</span><textarea id="s-c">${esc(s?.comment||'')}</textarea></label>
   <div class="bar" style="margin-top:16px"><button class="btn quiet" data-a="close">Отмена</button><button class="btn on" data-a="supSave" data-id="${id||''}">Сохранить</button></div><div id="s-err" style="color:var(--over);font-size:13px"></div>`)}
@@ -808,7 +815,7 @@ const A={
   pick:(v,d,el)=>{const was=document.getElementById('menu');closeMenu();if(was&&was.dataset.for===d.for)return;const opts=JSON.parse(d.opts),cur=$('#'+d.for).value;
     const m=openMenu(el,opts.map(o=>`<button data-a="pickSet" data-for="${d.for}" data-v="${esc(o[0])}">${esc(o[1])}${o[0]===cur?'<span class="ck">✓</span>':''}</button>`).join(''),opts.length>6);m.dataset.for=d.for},
   pickSet:(v,d)=>{closeMenu();const inp=$('#'+d.for),b=document.querySelector(`[data-a="pick"][data-for="${d.for}"]`),opts=JSON.parse(b.dataset.opts);inp.value=v;b.textContent=opts.find(o=>o[0]===v)[1];b.classList.toggle('ph',v==='');
-    if(d.for==='f-term')updPd();if(inp.dataset.h){ui.home[inp.dataset.h]=v;if(ui.home.per==='stat')ui.home.per='';if(inp.dataset.h==='sort')ui.home.sort=v;render()}},
+    if(d.for==='f-term')updPd();if(d.for==='f-sup'&&!$('#f-save').dataset.id)applySupTerm(v);if(d.for==='s-term')$('#s-dw').hidden=v!=='custom';if(inp.dataset.h){ui.home[inp.dataset.h]=v;if(ui.home.per==='stat')ui.home.per='';if(inp.dataset.h==='sort')ui.home.sort=v;render()}},
   stSet:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);if(!o)return;closeMenu();applySt(o,v);render();if(!$('#sheet').hidden&&$('#panel').dataset.o===o.id)openOrder(o.id)},
   search:()=>{const h=ui.home;sheet(`<h3>Поиск и фильтры</h3><input class="inp" id="hq" placeholder="Поиск" value="${esc(h.q)}">
   <div class="two"><div class="f"><span>Статус</span>${pickF('h-st',[['','Все'],...['prep','ord','paid'].map(k=>[k,stName[k]])],h.st||'','data-h="st"')}</div>
@@ -835,7 +842,8 @@ const A={
   cprev:()=>shiftCal(-1),cnext:()=>shiftCal(1),
   supOpen:(v,d)=>supOpen(d.id),supNew:()=>supForm(),supEdit:(v,d)=>supForm(d.id),
   supSave:(v,d)=>{const n=$('#s-n').value.trim();if(!n)return $('#s-err').textContent='Укажите название';
-    const f={name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:normTg($('#s-tg').value),wa:normWa($('#s-wa').value),max:d.id?(supOf(d.id).max||''):'',comment:$('#s-c').value.trim()};
+    const tv=$('#s-term').value,dv=Math.round(+$('#s-days').value);if(tv==='custom'&&($('#s-days').value.trim()===''||!(dv>=0&&dv<=365)))return $('#s-err').textContent='Укажите срок: от 0 до 365 дней';
+    const f={term:tv||undefined,days:tv==='custom'?dv:undefined,name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:normTg($('#s-tg').value),wa:normWa($('#s-wa').value),max:d.id?(supOf(d.id).max||''):'',comment:$('#s-c').value.trim()};
     if(d.id){const so=supOf(d.id),ks=Object.keys(f).filter(k=>JSON.stringify(so[k])!==JSON.stringify(f[k]));Object.assign(so,f);if(ks.length)touchObj('sup',so,ks)}else upsert('sup',{id:nid(),...f});log('Поставщик сохранён · '+n);closeSheet();render();toast('Сохранено')},
   supDel:(v,d)=>{const s=supOf(d.id),has=S.orders.some(o=>o.sup===s.id);
     if(has)ask('У поставщика есть заказы. Отправить в архив?','В архив',()=>{s.arch=true;touchObj('sup',s,['arch']);log('Поставщик в архиве · '+s.name);render();toast('Поставщик в архиве')});
@@ -851,7 +859,6 @@ const A={
   maxDlg:(v,d)=>showMaxDlg(d.p),
   maxForm:()=>{const p=normPhone(($('#s-p').value.split('\n')[0]||''));if(!p)return toast('Сначала укажите телефон');showMaxDlg(p)},
   maxGo:(v,d)=>{closeDlg();openMax(d.p)},
-  maxMore:()=>{closeDlg();openExt('https://max.ru/')},
   dlgclose:()=>closeDlg(),
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
   botOff:()=>{BOT.mode='none';BOT.url='';pushBot(true);botImg()},
@@ -859,7 +866,7 @@ const A={
   mback:()=>{ui.more=null;render()},msub:v=>{ui.more=v;render();scrollTo(0,0)},
   theme:v=>{UI.theme=v;lsSet('zakazy-ui',UI);applyLook();tintWp();render()},
   style:v=>{UI.style=v;lsSet('zakazy-ui',UI);applyLook();render()},
-  termDel:(v,d)=>{const t=termOf(d.id),n=S.orders.filter(o=>o.term===d.id).length;if(n)return toast('Срок используется в заказах: '+n);if(S.terms.length<2)return toast('Нужен хотя бы один срок');askDel(()=>{remove('terms',d.id);log('Срок удалён · '+t.name);render()})},
+  termDel:(v,d)=>{const t=termOf(d.id),n=S.orders.filter(o=>o.term===d.id).length+S.sup.filter(x=>x.term===d.id).length;if(n)return toast('Срок используется: '+n);if(S.terms.length<2)return toast('Нужен хотя бы один срок');askDel(()=>{remove('terms',d.id);log('Срок удалён · '+t.name);render()})},
   termAdd:()=>{const n=Math.round(+$('#tnew').value);if(!(n>0&&n<=365))return toast('Введите число дней от 1 до 365');if(S.terms.some(t=>t.days===n))return toast('Такой срок уже есть');upsert('terms',{id:'t'+n,name:'Отсрочка '+n+' '+dn(n),days:n});log('Срок добавлен · '+n+' '+dn(n));render()},
   rdTog:v=>{if(ui.nedit)return;const n=+v,rd=S.settings.rd.includes(n)?S.settings.rd.filter(x=>x!==n):[...S.settings.rd,n].sort((a,b)=>b-a);setSettings({rd,rdy:shownDays()});render()},
   nedit:()=>{ui.nedit=!ui.nedit;render()},
