@@ -212,7 +212,7 @@ button.toggle.solo{background:var(--surf);border:1px solid var(--line);border-ra
 .pickb.ph{color:var(--mute)}
 .menu{position:fixed;z-index:25;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:var(--edge),0 14px 36px rgba(0,0,0,.28);min-width:200px;max-width:calc(100vw - 24px);animation:pop .14s ease-out}
 @keyframes pop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
-.menu.list{max-height:46vh;overflow:auto}
+.menu.list{max-height:46vh;max-height:46dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:11px;font-size:15px;font-weight:500}
 .menu button:hover,.menu button:focus-visible{background:var(--blue2);outline:0}
 .menu button i{width:10px;height:10px;border-radius:50%;background:var(--c)}
@@ -292,6 +292,7 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .vbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;pointer-events:auto}
 .vbox iframe{width:100%;height:100%;border:0;border-radius:8px;background:#fff;pointer-events:auto}
 .vmsg{color:#d6dbe5;font-size:15px}
+.vbox .btn{pointer-events:auto}
 .vx{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;z-index:2;display:flex;align-items:center;justify-content:center;padding:0}
 .vx svg{width:20px;height:20px;stroke-width:2}
 .vbar{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px));color:#e8ebf2;pointer-events:none}
@@ -778,6 +779,7 @@ function applySupTerm(sid){const s=supOf(sid);if(!s||!s.term)return;
   else if(termOf(s.term))setPickVal('f-term',s.term);else return;updPd()}
 function normPhone(v){let d=String(v||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);else if(d.length===10)d='7'+d;return d.length>=11?d:''}
 const phTg=p=>p?'https://t.me/+'+p:'',phWa=p=>p?'https://wa.me/'+p:'';
+function normMax(v){v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))return v;if(/^(www\.)?max\.ru\//i.test(v))return 'https://'+v;if(/^[+\d][\d\s()+-]{5,}$/.test(v)){const p=normPhone(v);return p?'+'+p:v}return v}
 function normTg(v){v=(v||'').trim();if(/^@?[A-Za-z][A-Za-z0-9_]{3,}$/.test(v))return 'https://t.me/'+v.replace(/^@/,'');if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phTg(normPhone(v))||v;return v}
 function normWa(v){v=(v||'').trim();if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phWa(normPhone(v))||v;return v}
 const openExt=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(u);return}}catch(e){}window.open(u,'_blank','noopener')};
@@ -790,13 +792,13 @@ function showMaxDlg(p){$('#dlgc').innerHTML='<p>При переходе в MAX �
 const closeDlg=()=>{$('#dlgw').hidden=true};
 function contactRow(s){
   const call=s.phones[0]?'tel:'+s.phones[0].replace(/[^\d+]/g,''):'';
-  const p1=normPhone(s.phones[0]);
+  const p1=normPhone(s.phones[0]),mx=(s.max||'').trim(),mxLink=/^https?:\/\//i.test(mx)?mx:(/^(www\.)?max\.ru\//i.test(mx)?'https://'+mx:''),mxPh=mxLink?'':normPhone(mx);
   const acts=[['Telegram',tgUrl(s.tg)||phTg(p1),'#2AABEE','<svg viewBox="0 0 24 24"><path fill="#fff" d="M21.5 4.5L2.9 11.7c-.8.3-.8 1.2 0 1.5l4.6 1.4 1.8 5.6c.2.6.9.7 1.3.3l2.6-2.4 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3zM9.6 14.2l8.6-5.4-6.9 6.6-.3 3.1-1.4-4.3z"/></svg>'],
     ['WhatsApp',waUrl(s.wa)||phWa(p1),'#25D366','<svg viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 00-7.6 13.2L3.2 20.8l4.5-1.2A8.8 8.8 0 1012 3.2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path fill="#fff" d="M9 8.5c0 3.5 3 6.5 6.500 6.500l1-1.500-2-1-1 .8c-1-.4-1.900-1.300-2.300-2.300l.8-1-1-2z"/></svg>'],
-    ['MAX',p1?'#max':'','',MAXSVG],
+    ['MAX',mxLink?'#mxl':mxPh?'#max':'','',MAXSVG],
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
-    return x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${mxPh}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
 function supOpen(id){
   const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
@@ -808,8 +810,8 @@ function supForm(id){
   const s=id?supOf(id):null;
   sheet(`<h3>${s?'Изменить поставщика':'Новый поставщик'}</h3><label class="f"><span>Название *</span><input class="inp" id="s-n" value="${esc(s?.name||'')}"></label>
   <label class="f"><span>Телефоны, по одному в строке</span><textarea id="s-p">${esc((s?.phones||[]).join('\n'))}</textarea></label>
-  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><div class="f"><span>Срок оплаты по умолчанию</span>${pickF('s-term',supTermOpts(),s&&s.term||'')}</div><label class="f" id="s-dw" ${s&&s.term==='custom'?'':'hidden'}><span>Дней</span><input class="inp" id="s-days" type="number" min="0" max="365" inputmode="numeric" value="${s&&s.term==='custom'?(+s.days||0):''}"></label>
-  <div class="f"><span>MAX</span><button type="button" class="btn quiet wide" data-a="maxForm">Скопировать номер и открыть MAX</button></div>
+  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><label class="f"><span>MAX</span><input class="inp" id="s-mx" value="${esc(s?.max||'')}"></label>
+  <div class="f"><span>Срок оплаты по умолчанию</span>${pickF('s-term',supTermOpts(),s&&s.term||'')}</div><label class="f" id="s-dw" ${s&&s.term==='custom'?'':'hidden'}><span>Дней</span><input class="inp" id="s-days" type="number" min="0" max="365" inputmode="numeric" value="${s&&s.term==='custom'?(+s.days||0):''}"></label>
   <label class="f"><span>Почта</span><input class="inp" id="s-e" value="${esc(s?.email||'')}"></label>
   <label class="f"><span>Комментарий</span><textarea id="s-c">${esc(s?.comment||'')}</textarea></label>
   <div class="bar" style="margin-top:16px"><button class="btn quiet" data-a="close">Отмена</button><button class="btn on" data-a="supSave" data-id="${id||''}">Сохранить</button></div><div id="s-err" style="color:var(--over);font-size:13px"></div>`)}
@@ -842,8 +844,8 @@ const A={
   fchk:(v,d,el)=>{const i=el.querySelector('.sw');i.classList.toggle('on');if(v==='paid'&&i.classList.contains('on'))$('#f-ord').classList.add('on');if(v==='ord'&&!i.classList.contains('on'))$('#f-paid').classList.remove('on')},
   delOrder:(v,d)=>askDel(()=>{const o=S.orders.find(x=>x.id===d.id);if(!o)return;remove('orders',o.id);log('Заказ удалён · '+supName(o.sup));render();toast('Заказ удалён')}),
   fileDel:(v,d)=>ask('Убрать вложение в корзину?','В корзину',()=>{const o=S.orders.find(x=>x.id===d.id);if(!o||!o.file)return;const f=Object.assign({},o.file,{up:o.file.up||o.date});listOp('trash',[{id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:f,at:today()}]);o.file=null;touch(o,['вложение в корзине'],['file']);log('Вложение удалено · '+supName(o.sup)+' · '+f.name);openOrder(o.id);toast('Вложение в корзине на 14 дней')},{}),
-  fileView:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);if(o&&o.file)openViewer(o.file)},
-  trView:(v,d)=>{const i=S.settings.trash.find(x=>x.id===d.id);if(i)openViewer(i.file)},
+  fileView:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);if(o&&o.file)viewFile(o.file)},
+  trView:(v,d)=>{const i=S.settings.trash.find(x=>x.id===d.id);if(i)viewFile(i.file)},
   vclose:()=>closeViewer(),
   vopen:(v,d)=>openExt(d.u),
   stat:v=>{const h=ui.home;h.per='stat';h.stat=v;h.st='';h.sup='';h.q='';render()},
@@ -856,7 +858,7 @@ const A={
   supOpen:(v,d)=>supOpen(d.id),supNew:()=>supForm(),supEdit:(v,d)=>supForm(d.id),
   supSave:(v,d)=>{const n=$('#s-n').value.trim();if(!n)return $('#s-err').textContent='Укажите название';
     const tv=$('#s-term').value,dv=Math.round(+$('#s-days').value);if(tv==='custom'&&($('#s-days').value.trim()===''||!(dv>=0&&dv<=365)))return $('#s-err').textContent='Укажите срок: от 0 до 365 дней';
-    const f={term:tv||undefined,days:tv==='custom'?dv:undefined,name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:normTg($('#s-tg').value),wa:normWa($('#s-wa').value),max:d.id?(supOf(d.id).max||''):'',comment:$('#s-c').value.trim()};
+    const f={term:tv||undefined,days:tv==='custom'?dv:undefined,name:n,phones:$('#s-p').value.split('\n').map(x=>x.trim()).filter(Boolean),email:$('#s-e').value.trim(),tg:normTg($('#s-tg').value),wa:normWa($('#s-wa').value),max:normMax($('#s-mx').value),comment:$('#s-c').value.trim()};
     if(d.id){const so=supOf(d.id),ks=Object.keys(f).filter(k=>JSON.stringify(so[k])!==JSON.stringify(f[k]));Object.assign(so,f);if(ks.length)touchObj('sup',so,ks)}else upsert('sup',{id:nid(),...f});log('Поставщик сохранён · '+n);closeSheet();render();toast('Сохранено')},
   supDel:(v,d)=>{const s=supOf(d.id),has=S.orders.some(o=>o.sup===s.id);
     if(has)ask('У поставщика есть заказы. Отправить в архив?','В архив',()=>{s.arch=true;touchObj('sup',s,['arch']);log('Поставщик в архиве · '+s.name);render();toast('Поставщик в архиве')});
@@ -870,7 +872,7 @@ const A={
   smNext:()=>{const cur=today().slice(0,7),m=ui.sm||cur;if(m>=cur)return;const d=new Date(+m.slice(0,4),+m.slice(5,7),1);ui.sm=fD(d).slice(0,7);render()},
   fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
   maxDlg:(v,d)=>showMaxDlg(d.p),
-  maxForm:()=>{const p=normPhone(($('#s-p').value.split('\n')[0]||''));if(!p)return toast('Сначала укажите телефон');showMaxDlg(p)},
+  maxLink:(v,d)=>openExt(d.u),
   maxGo:(v,d)=>{closeDlg();openMax(d.p)},
   dlgclose:()=>closeDlg(),
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
@@ -909,7 +911,7 @@ function shiftCal(n){const c=ui.cal;
   else{c.cur=addD(c.cur,n*(c.mode==='week'?7:1));c.sel=c.cur}
   render()}
 
-document.addEventListener('scroll',e=>{if(!e.target.classList?.contains('strip'))closeMenu()},true);
+document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.nodeType===1&&(t.classList.contains('strip')||t.closest('#menu')))return;closeMenu()},true);
 document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.closest('[data-a="stPick"],[data-a="pick"]'))closeMenu();const el=e.target.closest('[data-a]');if(!el)return;
   if(el.dataset.a==='open'&&e.target.closest('[data-a="stPick"]'))return;
   const f=A[el.dataset.a];if(f)f(el.dataset.v,el.dataset,el)});
@@ -930,6 +932,7 @@ document.addEventListener('input',e=>{const t=e.target;
 document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='s-tg'){t.value=normTg(t.value);return}
   if(t.id==='s-wa'){t.value=normWa(t.value);return}
+  if(t.id==='s-mx'){t.value=normMax(t.value);return}
   if(t.id==='f-files'){const f=t.files[0];$('#fp-n').textContent=f?f.name:'Выберите файл';$('#fp-x').hidden=!f;return}
   if(t.id==='botfile'&&t.files[0]){botPhoto(t.files[0]);t.value='';return}
   if(t.id==='wpfile'&&t.files[0]){wpPrep(t.files[0]).then(async d=>{WP=d;UI.wpOff=false;lsSet('zakazy-ui',UI);const ok=await wpSave(d);applyWp();wpLum();toast(ok?'Обои установлены':'Обои установлены до закрытия, сохранить не удалось')}).catch(()=>toast('Не удалось открыть фото'));t.value='';return}
@@ -997,13 +1000,16 @@ function updEdges(){const de=document.documentElement,y=scrollY,max=de.scrollHei
   const nv=$('nav');if(nv)$('#edgeB').style.height=Math.max(0,innerHeight-nv.getBoundingClientRect().top)+'px';}
 addEventListener('scroll',updEdges,{passive:true,capture:true});addEventListener('resize',updEdges);
 let vURL=null;
-async function openViewer(f){const v=$('#viewer'),box=$('#vbox'),bar=$('#vbar'),url=f.url?BASE+String(f.url).replace(/^\//,''):'';
+const fileUrl=f=>{const u=String(f&&f.url||'');return u?(/^https?:\/\//i.test(u)?u:BASE+u.replace(/^\//,'')):''};
+function viewFile(f){const u=fileUrl(f);if(u&&/^http:/i.test(u)&&location.protocol==='https:'){openExt(u);return}openViewer(f)}
+async function openViewer(f){const v=$('#viewer'),box=$('#vbox'),bar=$('#vbar'),url=fileUrl(f);
   v.hidden=false;document.body.classList.add('lock');box.innerHTML='<div class="vmsg">Загрузка…</div>';
   bar.innerHTML='<div class="vname">'+esc(f.name)+'</div>'+(url?'<button class="btn quiet sm2" data-a="vopen" data-u="'+esc(url)+'">Открыть</button>':'');
   if(!url){box.innerHTML='<div class="vmsg">Файл недоступен</div>';return}
-  try{const r=await fetch(url);if(!r.ok)throw 0;const b=await r.blob();if(v.hidden)return;const ty=f.type||b.type||'';vURL=URL.createObjectURL(b);
+  const noPrev=()=>{if(!v.hidden)box.innerHTML='<button class="btn on" data-a="vopen" data-u="'+esc(url)+'">Открыть вложение</button>'};
+  try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),5000);const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw 0;const b=await r.blob();clearTimeout(tm);if(v.hidden)return;const ty=f.type||b.type||'';vURL=URL.createObjectURL(b);
     box.innerHTML=/^image\//.test(ty)||/\.(jpe?g|png|gif|webp)$/i.test(f.name)?'<img src="'+vURL+'" alt="">':(/pdf/.test(ty)||/\.pdf$/i.test(f.name))?'<iframe src="'+vURL+'" title=""></iframe>':'<div class="vmsg">Предпросмотр недоступен</div>'}
-  catch(e){if(!v.hidden)box.innerHTML='<div class="vmsg">Файл недоступен</div>'}}
+  catch(e){noPrev()}}
 function closeViewer(){$('#viewer').hidden=true;$('#vbox').innerHTML='';if(vURL){URL.revokeObjectURL(vURL);vURL=null}if($('#sheet').hidden)document.body.classList.remove('lock')}
 let DR=null;
 const dtEls=()=>[...document.querySelectorAll('#dgrid .dt')];
