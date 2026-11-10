@@ -160,7 +160,13 @@ h2 span{font-size:14px;font-weight:400;color:var(--mute)}
 textarea{resize:none;min-height:46px;overflow:hidden;display:block;line-height:1.4}
 .f{display:block;margin:14px 0 0;font-size:13px;font-weight:500;color:var(--mute)}
 .f>*:not(span){margin-top:6px;font-size:16px;font-weight:400;color:var(--ink)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.f{min-width:0}
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;min-height:46px;line-height:1.2}
+input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left;min-width:0}
+.cm{color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.row>div:first-child,.ev>div{min-width:0}
+.amt .ai,.ev .ai{width:15px;height:15px;vertical-align:-2px;margin-right:4px;color:var(--mute)}
 .sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .scrim{position:absolute;inset:0;background:var(--scrim)}
 .panel{position:relative;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:0;box-shadow:var(--edge);padding:22px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
@@ -484,6 +490,7 @@ const IC={
   log:'<rect x="5" y="4" width="14" height="16" rx="3"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/>',
   trash:'<path d="M5 7.5h14M9.5 7.5V5.5h5v2M7 7.5l.8 11a1 1 0 001 .9h6.4a1 1 0 001-.9l.8-11"/><path d="M10 11v5M14 11v5"/>',
   look:'<path d="M10.9 11.9L16.49 6.31A1.48 1.48 0 0 1 18.59 8.41L13 14"/><path d="M4 16.6C5.4 16.5 6 15.9 6.1 14.9A3.45 3.45 0 1 1 8.9 18.6C7 18.7 5.2 18 4 16.6Z"/>',
+  clip:'<path d="M8.5 4.5H13.6a2 2 0 0 1 1.4.6l2.9 2.9a2 2 0 0 1 .6 1.4V16.5a3 3 0 0 1-3 3H8.5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3z"/><path d="M13 4.7V8a1.5 1.5 0 0 0 1.5 1.5h3.8"/>',
   users:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c.5-3.6 3.4-5.5 7-5.5s6.5 1.9 7 5.5"/>',
   stats:'<path d="M5 19v-7M12 19V5M19 19v-10"/>',
   botwp:'<rect x="4" y="5" width="16" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4.5"/>',
@@ -500,7 +507,7 @@ const stat=o=>isOver(o)?'<span class="st over">Просрочен</span>':`<span
 function orderRow(o){
   const over=isOver(o),st=stOf(o),cls=over?'over':st,p=pd(o);
   const pay=over?`<span class="tagover">просрочено ${diff(today(),p)} дн.</span>`:o.paid?'оплачен':'оплатить до '+dm(p);
-  return `<div class="oc ${cls}" data-a="open" data-id="${o.id}"><div class="l1"><b>${esc(supName(o.sup))}</b><span class="amt">${rub(o.amount)}</span></div>
+  return `<div class="oc ${cls}" data-a="open" data-id="${o.id}"><div class="l1"><b>${esc(supName(o.sup))}</b><span class="amt">${o.file?svg('clip','ai'):''}${rub(o.amount)}</span></div>${o.comment?`<div class="cm">${esc(o.comment)}</div>`:''}
   <div class="l2"><span class="meta">${dm(o.date)} · ${pay}</span><button class="pill ${cls}" data-a="stPick" data-id="${o.id}" aria-haspopup="menu">${over?'Просрочен':stName[st]}</button></div></div>`}
 function touch(o,f,keys){touchObj('orders',o,keys||['ordered','paid'],{iso:new Date().toISOString(),f})}
 function setFlag(o,k){
@@ -589,7 +596,7 @@ function vPay(){const p=ui.pay;
 const skey=o=>isOver(o)?'over':stOf(o);
 const SN={prep:'Подготовлен',ord:'Заказан',paid:'Оплачен',over:'Просрочен'};
 function events(){const ev=[];ORD().forEach(o=>{if(ui.cal.hidePaid&&o.paid)return;const k=skey(o);ev.push({d:o.date,k,o});if(k==='over'){const p=pd(o);if(p.slice(0,7)!==o.date.slice(0,7))ev.push({d:p,k:'over',o,due:true})}});return ev}
-const evRow=e=>`<button class="ev" data-a="open" data-id="${e.o.id}"><i class="ek ${e.k}"></i><div><span class="k">${SN[e.k]}${e.due?' · срок оплаты':''}</span>${esc(supName(e.o.sup))}</div><b class="sm">${rub(e.o.amount)}</b></button>`;
+const evRow=e=>`<button class="ev" data-a="open" data-id="${e.o.id}"><i class="ek ${e.k}"></i><div><span class="k">${SN[e.k]}${e.due?' · срок оплаты':''}</span>${esc(supName(e.o.sup))}${e.o.comment?`<div class="cm">${esc(e.o.comment)}</div>`:''}</div><b class="sm">${e.o.file?svg('clip','ai'):''}${rub(e.o.amount)}</b></button>`;
 function vCal(){
   const c=ui.cal,T=today(),ev=events(),by={};ev.forEach(e=>(by[e.d]=by[e.d]||[]).push(e));
   const list=d=>(by[d]||[]).map(evRow).join('')||'<div class="empty">В этот день заказов нет</div>';
@@ -616,7 +623,7 @@ function supList(){
   const q=ui.sup.q.trim().toLowerCase();
   const l=S.sup.filter(s=>!s.arch&&(!q||s.name.toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
   return `<div class="led">${l.map(s=>{const os=ORD().filter(o=>o.sup===s.id),un=os.filter(o=>!o.paid).reduce((a,o)=>a+o.amount,0),pdn=os.filter(o=>o.paid).reduce((a,o)=>a+o.amount,0);
-    return `<button class="row" data-a="supOpen" data-id="${s.id}"><div><b>${esc(s.name)}</b><small>заказов: ${os.length}</small></div><div class="rr">${un?`<b>${rub(un)}</b><small>к оплате</small>`:pdn?`<b class="mute">${rub(pdn)}</b><small>оплачено</small>`:''}</div></button>`}).join('')||'<div class="empty">Не найдено</div>'}</div>`}
+    return `<button class="row" data-a="supOpen" data-id="${s.id}"><div><b>${esc(s.name)}</b>${s.comment?`<div class="cm">${esc(s.comment)}</div>`:''}<small>заказов: ${os.length}</small></div><div class="rr">${un?`<b>${rub(un)}</b><small>к оплате</small>`:pdn?`<b class="mute">${rub(pdn)}</b><small>оплачено</small>`:''}</div></button>`}).join('')||'<div class="empty">Не найдено</div>'}</div>`}
 function vSup(){return `<input class="inp" id="sq" placeholder="Поиск" value="${esc(ui.sup.q)}"><div id="sl" style="margin-top:10px">${supList()}</div><div class="bar"><button class="btn on wide" data-a="supNew">Новый поставщик</button></div><button class="setrow" data-a="msub" data-v="arch"><span class="ic">${svg('sup')}</span><span><b>Архив поставщиков</b><small>${S.sup.filter(s=>s.arch).length} шт.</small></span>${svg('chev','chev')}</button>`}
 
 /* ---------- настройки ---------- */
@@ -721,14 +728,15 @@ async function upload(file){
 
 /* ---------- форма заказа ---------- */
 function termOpts(){return[...termsSorted().map(t=>[t.id,t.name]),['custom','Определённая дата']]}
+function newOrderDate(){const T=today();if(ui.tab==='home'&&ui.home.mode==='day')return ui.home.cur||T;if(ui.calPicked&&ui.cal.sel)return ui.cal.sel;return T}
 function orderForm(id){
-  const o=id?S.orders.find(x=>x.id===id):null,T=today();
+  const o=id?S.orders.find(x=>x.id===id):null,T=today(),D0=o?o.date:newOrderDate();
   const tsel=o?(o.term==='custom'||termOf(o.term)?o.term:'custom'):(termsSorted().find(t=>t.days>0)||termsSorted()[0]||{id:'custom'}).id;
   const act=S.sup.filter(s=>!s.arch||o?.sup===s.id).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
-  const cdate=o?pd(o):addD(T,7);
+  const cdate=o?pd(o):addD(D0,7);
   sheet(`<h3>${o?'Изменить заказ':'Новый заказ'}</h3>
   <div class="f"><span>Поставщик *</span>${pickF('f-sup',[['','Выберите'],...act.map(s=>[s.id,s.name])],o?.sup||'')}</div>
-  <div class="two"><label class="f"><span>Сумма, ₽</span><input class="inp" id="f-amt" inputmode="decimal" maxlength="13" value="${o&&o.amount?o.amount:''}"></label><label class="f"><span>Дата заказа *</span><input class="inp" type="date" id="f-od" value="${o?o.date:T}"></label></div>
+  <div class="two"><label class="f"><span>Сумма, ₽</span><input class="inp" id="f-amt" inputmode="decimal" maxlength="13" value="${o&&o.amount?o.amount:''}"></label><label class="f"><span>Дата заказа *</span><input class="inp" type="date" id="f-od" value="${D0}"></label></div>
   <div class="f"><span>Срок оплаты *</span>${pickF('f-term',termOpts(),tsel)}</div><label class="f" id="f-dw" hidden><span>Дата оплаты</span><input class="inp" type="date" id="f-date" value="${cdate}"></label>
   <div class="mute sm" style="margin-top:8px">Оплатить до: <b id="f-pd"></b></div>
   <label class="f"><span>Комментарий</span><textarea id="f-cm">${esc(o?.comment||'')}</textarea></label>
@@ -803,8 +811,8 @@ function contactRow(s){
 function supOpen(id){
   const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
-  sheet(`<h3>${esc(s.name)}</h3>${s.arch?'<div class="mute sm">В архиве</div>':''}
-  ${contactRow(s)}${supTermLab(s)?`<div class="file"><span>Срок оплаты: <b>${esc(supTermLab(s))}</b></span></div>`:''}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}${s.comment?`<p class="mute">${esc(s.comment)}</p>`:''}
+  sheet(`<h3>${esc(s.name)}</h3>${s.comment?`<div class="mute" style="margin:-2px 0 6px">${esc(s.comment)}</div>`:''}${s.arch?'<div class="mute sm">В архиве</div>':''}
+  ${contactRow(s)}${supTermLab(s)?`<div class="file"><span>Срок оплаты: <b>${esc(supTermLab(s))}</b></span></div>`:''}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}
   <h2>Заказы <span>${os.length}</span></h2><div class="cards">${os.map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>
   <div class="bar" style="margin-top:18px"><button class="btn" data-a="supEdit" data-id="${id}">Изменить</button><button class="btn quiet" data-a="supDel" data-id="${id}">${os.length?'В архив':'Удалить'}</button><button class="btn quiet" data-a="close">Закрыть</button></div>`)}
 function supForm(id){
@@ -854,7 +862,7 @@ const A={
   hmode:v=>{ui.home.mode=v;ui.home.per='';render()},
   hprev:()=>shiftHome(-1),hnext:()=>shiftHome(1),
   pcat:v=>{ui.pay.cat=v;ui.pay.page=0;render()},pper:v=>{ui.pay.per=v;ui.pay.page=0;render()},ppage:v=>{ui.pay.page+=v==='next'?1:-1;$('#pl').innerHTML=payList()},
-  cmode:v=>{ui.cal.mode=v;ui.cal.cur=ui.cal.sel;render()},chide:()=>{ui.cal.hidePaid=!ui.cal.hidePaid;render()},cday:v=>{ui.cal.sel=v;render()},
+  cmode:v=>{ui.cal.mode=v;ui.cal.cur=ui.cal.sel;render()},chide:()=>{ui.cal.hidePaid=!ui.cal.hidePaid;render()},cday:v=>{ui.cal.sel=v;ui.calPicked=true;render()},
   cprev:()=>shiftCal(-1),cnext:()=>shiftCal(1),
   supOpen:(v,d)=>supOpen(d.id),supNew:()=>supForm(),supEdit:(v,d)=>supForm(d.id),
   supSave:(v,d)=>{const n=$('#s-n').value.trim();if(!n)return $('#s-err').textContent='Укажите название';
@@ -903,7 +911,7 @@ const A={
   trClear:()=>askDel(()=>{listOp('trash',[],S.settings.trash.map(x=>x.id));log('Корзина очищена');render()}),
   logMore:()=>{ui.logn+=50;$('#ll').innerHTML=logList()}
 };
-function shiftHome(n){const h=ui.home;h.per='';
+function shiftHome(n){const h=ui.home;h.per='';ui.calPicked=false;
   if(h.mode==='month'){const x=toD(h.cur);h.cur=fD(new Date(x.getFullYear(),x.getMonth()+n,1))}
   else h.cur=addD(h.cur,n*(h.mode==='week'?7:1));
   render()}
@@ -937,8 +945,8 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='f-files'){const f=t.files[0];$('#fp-n').textContent=f?f.name:'Выберите файл';$('#fp-x').hidden=!f;return}
   if(t.id==='botfile'&&t.files[0]){botPhoto(t.files[0]);t.value='';return}
   if(t.id==='wpfile'&&t.files[0]){wpPrep(t.files[0]).then(async d=>{WP=d;UI.wpOff=false;lsSet('zakazy-ui',UI);const ok=await wpSave(d);applyWp();wpLum();toast(ok?'Обои установлены':'Обои установлены до закрытия, сохранить не удалось')}).catch(()=>toast('Не удалось открыть фото'));t.value='';return}
-  if(t.id==='hjump'&&t.value){ui.home.cur=t.value;ui.home.per='';render()}
-  else if(t.id==='cjump'&&t.value){ui.cal.cur=t.value;ui.cal.sel=t.value;render()}
+  if(t.id==='hjump'&&t.value){ui.calPicked=false;ui.home.cur=t.value;ui.home.per='';render()}
+  else if(t.id==='cjump'&&t.value){ui.calPicked=true;ui.cal.cur=t.value;ui.cal.sel=t.value;render()}
   else if(t.id==='addf'&&t.files[0]){const o=S.orders.find(x=>x.id===t.dataset.id);toast('Загрузка…');upload(t.files[0]).then(f=>{o.file=f;touch(o,['вложение'],['file']);log('Вложение добавлено · '+supName(o.sup)+' · '+f.name);openOrder(o.id);toast('Файл добавлен')}).catch(()=>toast('Файл не загрузился'))}});
 const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('zakazy-wp',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
 const idbDo=(mode,fn)=>idb().then(db=>new Promise((res,rej)=>{const t=db.transaction('k',mode),r=fn(t.objectStore('k'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej()}));
