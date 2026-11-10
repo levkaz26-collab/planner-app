@@ -788,17 +788,18 @@ function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.
 function openMax(num){copyText('+'+num).then(()=>toast('Номер скопирован'));let gone=false;const h=()=>{if(document.hidden)gone=true};document.addEventListener('visibilitychange',h);
   const a=document.createElement('a');a.href='max://';document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!gone)openExt('https://max.ru/')},800)}
-function showMaxDlg(p){$('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
+function showMaxDlg(p){if(!p){$('#dlgc').innerHTML='<p>У этого поставщика не указан номер телефона. Добавьте его в карточке поставщика.</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false;return}
+  $('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
 const closeDlg=()=>{$('#dlgw').hidden=true};
 function contactRow(s){
   const call=s.phones[0]?'tel:'+s.phones[0].replace(/[^\d+]/g,''):'';
   const p1=normPhone(s.phones[0]),mx=(s.max||'').trim(),mxLink=/^https?:\/\//i.test(mx)?mx:(/^(www\.)?max\.ru\//i.test(mx)?'https://'+mx:''),mxPh=mxLink?'':normPhone(mx);
   const acts=[['Telegram',tgUrl(s.tg)||phTg(p1),'#2AABEE','<svg viewBox="0 0 24 24"><path fill="#fff" d="M21.5 4.5L2.9 11.7c-.8.3-.8 1.2 0 1.5l4.6 1.4 1.8 5.6c.2.6.9.7 1.3.3l2.6-2.4 4.7 3.5c.6.4 1.4.1 1.6-.6L22.9 5.8c.2-.9-.6-1.6-1.4-1.3zM9.6 14.2l8.6-5.4-6.9 6.6-.3 3.1-1.4-4.3z"/></svg>'],
     ['WhatsApp',waUrl(s.wa)||phWa(p1),'#25D366','<svg viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 00-7.6 13.2L3.2 20.8l4.5-1.2A8.8 8.8 0 1012 3.2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path fill="#fff" d="M9 8.5c0 3.5 3 6.5 6.500 6.500l1-1.500-2-1-1 .8c-1-.4-1.900-1.300-2.300-2.300l.8-1-1-2z"/></svg>'],
-    ['MAX',mxLink?'#mxl':mxPh?'#max':'','',MAXSVG],
+    ['MAX',mxLink?'#mxl':'#max','',MAXSVG],
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
-    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${mxPh}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1||mxPh}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
 function supOpen(id){
   const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
