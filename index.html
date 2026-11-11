@@ -818,7 +818,7 @@ function contactRow(s){
     ['MAX',mxLink?'#mxl':'#max','',MAXSVG],
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
-    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1||mxPh}">${inner}</button>`:x[1]?(x[1].startsWith('tel:')?`<a class="act" href="${esc(x[1])}">${inner}</a>`:`<button class="act" data-a="extGo" data-u="${esc(x[1])}">${inner}</button>`):`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${mxPh||p1}">${inner}</button>`:x[1]?(x[1].startsWith('tel:')?`<a class="act" href="${esc(x[1])}">${inner}</a>`:`<button class="act" data-a="extGo" data-u="${esc(x[1])}">${inner}</button>`):`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
 let SP={id:'',page:0};
 function supOrders(){const os=ORD().filter(o=>o.sup===SP.id).sort((a,b)=>b.date.localeCompare(a.date)),N=os.length,pages=Math.max(1,Math.ceil(N/10));SP.page=Math.max(0,Math.min(SP.page,pages-1));
   return `<div class="cards">${os.slice(SP.page*10,SP.page*10+10).map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>`+(pages>1?`<div class="pager"><button class="btn quiet sm2" data-a="spage" data-v="prev" ${SP.page?'':'disabled'}>‹ Назад</button><span class="mute sm">${Math.min((SP.page+1)*10,N)} из ${N}</span><button class="btn quiet sm2" data-a="spage" data-v="next" ${SP.page<pages-1?'':'disabled'}>Далее ›</button></div>`:'')}
@@ -834,7 +834,7 @@ function supForm(id){
   const s=id?supOf(id):null;
   sheet(`<h3>${s?'Изменить поставщика':'Новый поставщик'}</h3><label class="f"><span>Название *</span><input class="inp" id="s-n" value="${esc(s?.name||'')}"></label>
   <label class="f"><span>Телефоны, по одному в строке</span><textarea id="s-p">${esc((s?.phones||[]).join('\n'))}</textarea></label>
-  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><label class="f"><span>MAX</span><input class="inp" id="s-mx" value="${esc(s?.max||'')}"></label>
+  <label class="f"><span>Telegram</span><input class="inp" id="s-tg" value="${esc(s?.tg||'')}" ${s&&s.tg?'data-m="1"':''}></label><label class="f"><span>WhatsApp</span><input class="inp" id="s-wa" value="${esc(s?.wa||'')}" ${s&&s.wa?'data-m="1"':''}></label><label class="f"><span>MAX</span><input class="inp" id="s-mx" value="${esc(s?.max||'')}" ${s&&s.max&&s.max!==(normPhone(s.phones[0])?'+'+normPhone(s.phones[0]):'')?'data-m="1"':''}></label>
   <div class="f"><span>Срок оплаты по умолчанию</span>${pickF('s-term',supTermOpts(),s&&s.term||'')}</div><label class="f" id="s-dw" ${s&&s.term==='custom'?'':'hidden'}><span>Дней</span><input class="inp" id="s-days" type="number" min="0" max="365" inputmode="numeric" value="${s&&s.term==='custom'?(+s.days||0):''}"></label>
   <label class="f"><span>Почта</span><input class="inp" id="s-e" value="${esc(s?.email||'')}"></label>
   <label class="f"><span>Комментарий</span><textarea id="s-c">${esc(s?.comment||'')}</textarea></label>
@@ -943,7 +943,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.c
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dlgw').hidden){closeDlg();return}if(!$('#viewer').hidden){closeViewer();return}if(document.getElementById('menu'))closeMenu();else if(!$('#sheet').hidden)closeSheet()}});
 document.addEventListener('input',e=>{const t=e.target;
   if(t.id==='s-tg'||t.id==='s-wa')t.dataset.m='1';
-  if(t.id==='s-p'){const p1=normPhone((t.value.split('\n')[0]||'')),tg=$('#s-tg'),wa=$('#s-wa');if(tg&&!tg.dataset.m)tg.value=phTg(p1);if(wa&&!wa.dataset.m)wa.value=phWa(p1)}
+  if(t.id==='s-mx'){if(t.value.trim())t.dataset.m='1';else delete t.dataset.m}
+  if(t.id==='s-p'){const p1=normPhone((t.value.split('\n')[0]||'')),tg=$('#s-tg'),wa=$('#s-wa');if(tg&&!tg.dataset.m)tg.value=phTg(p1);if(wa&&!wa.dataset.m)wa.value=phWa(p1);const mx=$('#s-mx');if(mx&&!mx.dataset.m)mx.value=p1?'+'+p1:''}
   if(t.id==='bh'){BOT.hue=+t.value;applyBotPrev();pushBot();return}
   if(t.id==='bb'||t.id==='bd'){if(t.id==='bb'){BOT.blur=+t.value;$('#bbv').textContent=t.value}else{BOT.dim=+t.value;$('#bdv').textContent=t.value+'%'}applyBotPrev();pushBot();return}
   if(t.id==='wpb'){UI.wpBlur=+t.value;$('#wpbv').textContent=t.value;lsSet('zakazy-ui',UI);applyWp();return}
