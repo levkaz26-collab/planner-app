@@ -314,6 +314,8 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .dlgc{position:relative;width:100%;max-width:340px;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--edge),var(--fx)}
 .dlgc h3{margin:0 0 8px;font-size:20px;font-weight:700}
 .dlgc p{margin:0 0 16px;color:var(--ink);font-size:14.5px;line-height:1.45}
+.tapnum{text-decoration:underline dotted;cursor:pointer;user-select:text;-webkit-user-select:text}
+.inp.bignum{width:100%;margin:4px 0 10px;text-align:center;font-size:20px}
 .bignum{font-size:26px;font-weight:700;text-align:center;margin:4px 0 8px;user-select:text;-webkit-user-select:text}
 .dlgc p{user-select:text;-webkit-user-select:text}
 .dlgb{display:flex;flex-direction:column;gap:8px}
@@ -793,16 +795,20 @@ const phTg=p=>p?'https://t.me/+'+p:'',phWa=p=>p?'https://wa.me/'+p:'';
 function normMax(v){v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))return v;if(/^(www\.)?max\.ru\//i.test(v))return 'https://'+v;if(/^[+\d][\d\s()+-]{5,}$/.test(v)){const p=normPhone(v);return p?'+'+p:v}return v}
 function normTg(v){v=(v||'').trim();if(/^@?[A-Za-z][A-Za-z0-9_]{3,}$/.test(v))return 'https://t.me/'+v.replace(/^@/,'');if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phTg(normPhone(v))||v;return v}
 function normWa(v){v=(v||'').trim();if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phWa(normPhone(v))||v;return v}
-const openExt=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(u);return}}catch(e){}window.open(u,'_blank','noopener')};
+const openExt=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(u,{try_instant_view:false});return}}catch(e){}window.open(u,'_blank','noopener')};
 const openTg=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openTelegramLink&&/^https?:\/\/(t|telegram)\.me\//i.test(u)){Telegram.WebApp.openTelegramLink(u);return}}catch(e){}openExt(u)};
-function copyText(t){const fb=()=>{let ok=false;const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();try{a.setSelectionRange(0,t.length);ok=document.execCommand('copy')}catch(e){}a.remove();return ok};
-  try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>true,()=>fb())}catch(e){}return Promise.resolve(fb())}
-function openMax(num){const t='+'+num;const pr=copyText(t);openExt('https://max.ru/');
-  pr.then(ok=>{const c=$('#dlgc');if($('#dlgw').hidden||!c)return;
-    if(ok){c.innerHTML='<p>Номер скопирован. Откройте MAX и найдите контакт по номеру</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';clearTimeout(openMax.t);openMax.t=setTimeout(()=>{if(c.querySelector('[data-a="dlgclose"]'))closeDlg()},2800)}
-    else c.innerHTML='<div class="bignum">'+esc(t)+'</div><p>Скопируйте номер вручную</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>'})}
+function copyNow(t){let p=null,ok=false;
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)p=Promise.resolve(navigator.clipboard.writeText(t)).then(()=>true,()=>false)}catch(e){}
+  try{const a=document.createElement('textarea');a.value=t;a.readOnly=false;a.contentEditable='true';a.style.cssText='position:fixed;top:0;left:0;opacity:0;width:1px;font-size:16px';document.body.appendChild(a);a.focus();
+    const rg=document.createRange();rg.selectNodeContents(a);const sl=window.getSelection();if(sl){sl.removeAllRanges();sl.addRange(rg)}a.setSelectionRange(0,999999);ok=!!document.execCommand('copy');if(sl)sl.removeAllRanges();a.remove()}catch(e){ok=false}
+  return ok?Promise.resolve(true):(p||Promise.resolve(false))}
+function maxState(t,ok,msg){const c=$('#dlgc');if(!c||$('#dlgw').hidden)return;const n=t.replace(/^\+/,'');
+  if(ok)c.innerHTML='<p>Номер скопирован: <b class="tapnum" data-a="numCopy" data-p="'+esc(n)+'">'+esc(t)+'</b>. Если MAX не открылся, откройте его и вставьте номер в поиск</p>'+(msg?'<p class="mute sm">'+msg+'</p>':'')+'<div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+esc(n)+'">Открыть MAX ещё раз</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';
+  else{c.innerHTML='<p>Скопируйте номер вручную</p><input class="inp bignum" id="mx-num" readonly value="'+esc(t)+'"><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+esc(n)+'">Открыть MAX ещё раз</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';const i=$('#mx-num');const sel=()=>{try{i.focus();i.select();i.setSelectionRange(0,999)}catch(e){}};i.addEventListener('focus',sel);i.addEventListener('click',sel);i.addEventListener('touchend',sel)}}
+function openMax(num){const t='+'+num;const pr=copyNow(t);openExt('https://max.ru/');pr.then(ok=>maxState(t,ok))}
+function copyNum(num){const t='+'+num;copyNow(t).then(ok=>{if(ok){toast('Скопировано');maxState(t,true)}else maxState(t,false)})}
 function showMaxDlg(p){if(!p){$('#dlgc').innerHTML='<p>У этого поставщика не указан номер телефона. Добавьте его в карточке поставщика.</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false;return}
-  $('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
+  $('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><p>Номер: <b class="tapnum" data-a="numCopy" data-p="'+p+'">+'+p+'</b></p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
 const closeDlg=()=>{$('#dlgw').hidden=true};
 function contactRow(s){
   const call=s.phones[0]?'tel:'+s.phones[0].replace(/[^\d+]/g,''):'';
@@ -892,7 +898,7 @@ const A={
   fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
   maxDlg:(v,d)=>showMaxDlg(d.p),
   maxLink:(v,d)=>openExt(d.u),
-  maxGo:(v,d)=>openMax(d.p),extGo:(v,d)=>{/^https?:\/\/(t|telegram)\.me\//i.test(d.u)?openTg(d.u):openExt(d.u)},
+  maxGo:(v,d)=>openMax(d.p),numCopy:(v,d)=>copyNum(d.p),extGo:(v,d)=>{/^https?:\/\/(t|telegram)\.me\//i.test(d.u)?openTg(d.u):openExt(d.u)},
   dlgclose:()=>closeDlg(),
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
   botOff:()=>{BOT.mode='none';BOT.url='';pushBot(true);botImg()},
