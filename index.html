@@ -314,6 +314,8 @@ html.haswp #edgeB{background:linear-gradient(to bottom,transparent,color-mix(in 
 .dlgc{position:relative;width:100%;max-width:340px;background:var(--pbg);-webkit-backdrop-filter:var(--pblur);backdrop-filter:var(--pblur);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--edge),var(--fx)}
 .dlgc h3{margin:0 0 8px;font-size:20px;font-weight:700}
 .dlgc p{margin:0 0 16px;color:var(--ink);font-size:14.5px;line-height:1.45}
+.bignum{font-size:26px;font-weight:700;text-align:center;margin:4px 0 8px;user-select:text;-webkit-user-select:text}
+.dlgc p{user-select:text;-webkit-user-select:text}
 .dlgb{display:flex;flex-direction:column;gap:8px}
 .deny{margin-top:28vh;text-align:center;padding:28px 18px;background:var(--surf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--edge),var(--fx);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);display:flex;flex-direction:column;gap:8px}
 .deny b{font-size:22px}.deny span{color:var(--mute)}
@@ -792,11 +794,13 @@ function normMax(v){v=(v||'').trim();if(!v)return '';if(/^https?:\/\//i.test(v))
 function normTg(v){v=(v||'').trim();if(/^@?[A-Za-z][A-Za-z0-9_]{3,}$/.test(v))return 'https://t.me/'+v.replace(/^@/,'');if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phTg(normPhone(v))||v;return v}
 function normWa(v){v=(v||'').trim();if(/^[+\d][\d\s()+-]{5,}$/.test(v))return phWa(normPhone(v))||v;return v}
 const openExt=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink){Telegram.WebApp.openLink(u);return}}catch(e){}window.open(u,'_blank','noopener')};
-function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
-  try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).catch(fb)}catch(e){}fb();return Promise.resolve()}
-function openMax(num){copyText('+'+num).then(()=>toast('Номер скопирован'));let gone=false;const h=()=>{if(document.hidden)gone=true};document.addEventListener('visibilitychange',h);
-  const a=document.createElement('a');a.href='max://';document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!gone)openExt('https://max.ru/')},800)}
+const openTg=u=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openTelegramLink&&/^https?:\/\/(t|telegram)\.me\//i.test(u)){Telegram.WebApp.openTelegramLink(u);return}}catch(e){}openExt(u)};
+function copyText(t){const fb=()=>{let ok=false;const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();try{a.setSelectionRange(0,t.length);ok=document.execCommand('copy')}catch(e){}a.remove();return ok};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>true,()=>fb())}catch(e){}return Promise.resolve(fb())}
+function openMax(num){const t='+'+num;const pr=copyText(t);openExt('https://max.ru/');
+  pr.then(ok=>{const c=$('#dlgc');if($('#dlgw').hidden||!c)return;
+    if(ok){c.innerHTML='<p>Номер скопирован. Откройте MAX и найдите контакт по номеру</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';clearTimeout(openMax.t);openMax.t=setTimeout(()=>{if(c.querySelector('[data-a="dlgclose"]'))closeDlg()},2800)}
+    else c.innerHTML='<div class="bignum">'+esc(t)+'</div><p>Скопируйте номер вручную</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>'})}
 function showMaxDlg(p){if(!p){$('#dlgc').innerHTML='<p>У этого поставщика не указан номер телефона. Добавьте его в карточке поставщика.</p><div class="dlgb"><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false;return}
   $('#dlgc').innerHTML='<p>При переходе в MAX номер скопируется. Найдите клиента по номеру, чтобы начать общение.</p><div class="dlgb"><button class="btn on wide" data-a="maxGo" data-p="'+p+'">Открыть MAX</button><button class="btn quiet wide" data-a="dlgclose">Отмена</button></div>';$('#dlgw').hidden=false}
 const closeDlg=()=>{$('#dlgw').hidden=true};
@@ -808,7 +812,7 @@ function contactRow(s){
     ['MAX',mxLink?'#mxl':'#max','',MAXSVG],
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
-    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1||mxPh}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+    return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1||mxPh}">${inner}</button>`:x[1]?(x[1].startsWith('tel:')?`<a class="act" href="${esc(x[1])}">${inner}</a>`:`<button class="act" data-a="extGo" data-u="${esc(x[1])}">${inner}</button>`):`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
 let SP={id:'',page:0};
 function supOrders(){const os=ORD().filter(o=>o.sup===SP.id).sort((a,b)=>b.date.localeCompare(a.date)),N=os.length,pages=Math.max(1,Math.ceil(N/10));SP.page=Math.max(0,Math.min(SP.page,pages-1));
   return `<div class="cards">${os.slice(SP.page*10,SP.page*10+10).map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>`+(pages>1?`<div class="pager"><button class="btn quiet sm2" data-a="spage" data-v="prev" ${SP.page?'':'disabled'}>‹ Назад</button><span class="mute sm">${Math.min((SP.page+1)*10,N)} из ${N}</span><button class="btn quiet sm2" data-a="spage" data-v="next" ${SP.page<pages-1?'':'disabled'}>Далее ›</button></div>`:'')}
@@ -888,7 +892,7 @@ const A={
   fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
   maxDlg:(v,d)=>showMaxDlg(d.p),
   maxLink:(v,d)=>openExt(d.u),
-  maxGo:(v,d)=>{closeDlg();openMax(d.p)},
+  maxGo:(v,d)=>openMax(d.p),extGo:(v,d)=>{/^https?:\/\/(t|telegram)\.me\//i.test(d.u)?openTg(d.u):openExt(d.u)},
   dlgclose:()=>closeDlg(),
   btheme:v=>{BOT.theme=v;pushBot(true);render()},
   botOff:()=>{BOT.mode='none';BOT.url='';pushBot(true);botImg()},
