@@ -155,6 +155,7 @@ h2 span{font-size:14px;font-weight:400;color:var(--mute)}
 .btn.sm2{padding:8px 12px;font-size:13px;border-radius:11px}
 .bar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
 .bar .btn{flex:1;min-width:104px}
+.bar.nw{flex-wrap:nowrap}.bar.nw .btn{min-width:0;padding-left:6px;padding-right:6px;white-space:nowrap}
 .inp,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);background:var(--surf2);border-radius:12px;min-width:0;font-size:16px}
 .inp:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
 textarea{resize:none;min-height:46px;overflow:hidden;display:block;line-height:1.4}
@@ -808,13 +809,17 @@ function contactRow(s){
     ['Позвонить',call,'var(--blue)','<svg viewBox="0 0 24 24"><path fill="#fff" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>']];
   return `<div class="acts">${acts.map(x=>{const inner=`<span class="ic2" style="${x[2]?'background:'+x[2]:''}">${x[3]}</span>${x[0]}`;
     return x[1]==='#mxl'?`<button class="act" data-a="maxLink" data-u="${esc(mxLink)}">${inner}</button>`:x[1]==='#max'?`<button class="act" data-a="maxDlg" data-p="${p1||mxPh}">${inner}</button>`:x[1]?`<a class="act" href="${esc(x[1])}" ${x[1].startsWith('tel:')?'':'target="_blank" rel="noopener"'}>${inner}</a>`:`<button class="act off" data-a="supEdit" data-id="${s.id}" aria-label="${x[0]}: добавить">${inner}</button>`}).join('')}</div>`}
+let SP={id:'',page:0};
+function supOrders(){const os=ORD().filter(o=>o.sup===SP.id).sort((a,b)=>b.date.localeCompare(a.date)),N=os.length,pages=Math.max(1,Math.ceil(N/10));SP.page=Math.max(0,Math.min(SP.page,pages-1));
+  return `<div class="cards">${os.slice(SP.page*10,SP.page*10+10).map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>`+(pages>1?`<div class="pager"><button class="btn quiet sm2" data-a="spage" data-v="prev" ${SP.page?'':'disabled'}>‹ Назад</button><span class="mute sm">${Math.min((SP.page+1)*10,N)} из ${N}</span><button class="btn quiet sm2" data-a="spage" data-v="next" ${SP.page<pages-1?'':'disabled'}>Далее ›</button></div>`:'')}
 function supOpen(id){
-  const s=supOf(id);if(!s)return;const os=ORD().filter(o=>o.sup===id).sort((a,b)=>b.date.localeCompare(a.date));
+  const s=supOf(id);if(!s)return;SP={id,page:0};const N=ORD().filter(o=>o.sup===id).length;
   const ph=p=>`<div class="file"><span>${esc(p)}</span><a href="tel:${esc(p.replace(/[^\d+]/g,''))}">Позвонить</a></div>`;
-  sheet(`<h3>${esc(s.name)}</h3>${s.comment?`<div class="mute" style="margin:-2px 0 6px">${esc(s.comment)}</div>`:''}${s.arch?'<div class="mute sm">В архиве</div>':''}
-  ${contactRow(s)}${supTermLab(s)?`<div class="file"><span>Срок оплаты: <b>${esc(supTermLab(s))}</b></span></div>`:''}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}
-  <h2>Заказы <span>${os.length}</span></h2><div class="cards">${os.map(orderRow).join('')||'<div class="empty">Заказов пока нет</div>'}</div>
-  <div class="bar" style="margin-top:18px"><button class="btn" data-a="supEdit" data-id="${id}">Изменить</button><button class="btn quiet" data-a="supDel" data-id="${id}">${os.length?'В архив':'Удалить'}</button><button class="btn quiet" data-a="close">Закрыть</button></div>`)}
+  sheet(`<h3>${esc(s.name)}</h3>${supTermLab(s)?`<div class="mute" style="margin:-2px 0 6px">Срок оплаты: <b>${esc(supTermLab(s))}</b></div>`:''}${s.comment?`<div class="mute" style="margin:-2px 0 6px">${esc(s.comment)}</div>`:''}${s.arch?'<div class="mute sm">В архиве</div>':''}
+  ${contactRow(s)}${s.phones.map(ph).join('')}${s.email?`<div class="file"><span>${esc(s.email)}</span></div>`:''}
+  <div class="bar nw" style="margin-top:18px"><button class="btn" data-a="supEdit" data-id="${id}">Изменить</button><button class="btn quiet" data-a="supDel" data-id="${id}">${N?'В архив':'Удалить'}</button><button class="btn quiet" data-a="close">Закрыть</button></div>
+  <div style="height:1px;background:var(--line2);margin:16px 0 2px"></div>
+  <h2>Заказы <span>${N}</span></h2><div id="sol">${supOrders()}</div>`)}
 function supForm(id){
   const s=id?supOf(id):null;
   sheet(`<h3>${s?'Изменить поставщика':'Новый поставщик'}</h3><label class="f"><span>Название *</span><input class="inp" id="s-n" value="${esc(s?.name||'')}"></label>
@@ -861,6 +866,7 @@ const A={
   clearstat:()=>{ui.home.per='';render()},
   hmode:v=>{ui.home.mode=v;ui.home.per='';render()},
   hprev:()=>shiftHome(-1),hnext:()=>shiftHome(1),
+  spage:v=>{SP.page+=v==='next'?1:-1;const e=$('#sol');if(e)e.innerHTML=supOrders()},
   pcat:v=>{ui.pay.cat=v;ui.pay.page=0;render()},pper:v=>{ui.pay.per=v;ui.pay.page=0;render()},ppage:v=>{ui.pay.page+=v==='next'?1:-1;$('#pl').innerHTML=payList()},
   cmode:v=>{ui.cal.mode=v;ui.cal.cur=ui.cal.sel;render()},chide:()=>{ui.cal.hidePaid=!ui.cal.hidePaid;render()},cday:v=>{ui.cal.sel=v;ui.calPicked=true;render()},
   cprev:()=>shiftCal(-1),cnext:()=>shiftCal(1),
