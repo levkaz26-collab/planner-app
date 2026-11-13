@@ -411,7 +411,7 @@ function norm(s){
   const r={rev:s.rev||0,sup:A('sup').filter(x=>x&&x.id),terms:A('terms').filter(x=>x&&x.id),orders:A('orders').filter(x=>x&&x.id),rems:A('rems'),settings:Object.assign(DEF_SET(),Array.isArray(s.settings)?{}:s.settings||{})};
   if(!r.terms.length)r.terms=DEF_TERMS();
   r.sup.forEach(x=>{x.name=x.name||'—';x.phones=Array.isArray(x.phones)?x.phones:[];['tg','max','wa','email','comment'].forEach(k=>x[k]=x[k]||'')});
-  r.orders.forEach(o=>{o.amount=+o.amount||0;o.hist=Array.isArray(o.hist)?o.hist:[];o.comment=o.comment||'';o.ordered=!!(o.ordered||o.paid);o.paid=!!o.paid;o.file=o.file&&o.file.name?o.file:null;if(!/^\d{4}-\d\d-\d\d$/.test(o.date||''))o.date=today()});
+  r.orders.forEach(o=>{o.amount=+o.amount||0;o.hist=Array.isArray(o.hist)?o.hist:[];o.comment=o.comment||'';o.ordered=!!(o.ordered||o.paid);o.paid=!!o.paid;o.files=(Array.isArray(o.files)?o.files:[]).filter(f=>f&&f.name);if(!o.files.length&&o.file&&o.file.name)o.files=[o.file];o.file=o.files[0]||null;if(!/^\d{4}-\d\d-\d\d$/.test(o.date||''))o.date=today()});
   if(!Array.isArray(r.settings.rd))r.settings.rd=[5,1,0];
   r.settings.trash=(Array.isArray(r.settings.trash)?r.settings.trash:[]).filter(x=>x&&x.kind==='file'&&x.file).map(x=>Object.assign({},x,{id:x.id||nid(),at:/^\d{4}-\d\d-\d\d$/.test(x.at||'')?x.at:today()}));
   r.settings.log=(Array.isArray(r.settings.log)?r.settings.log:[]).filter(x=>x&&x.id&&x.text);
@@ -462,7 +462,7 @@ async function pull(){if(!REMOTE||busy||queue.length)return;
   catch(e){netOk=false;if(!loaded)loaded=true;softRender()}}
 function softRender(){if(accessDenied()){render();return}if($('#sheet').hidden&&!document.getElementById('menu')&&!document.activeElement?.matches?.('input,textarea'))render();else dirty=true}
 function sweep(){if(!loaded||accessDenied())return;const T=today(),add=[];
-  S.orders.forEach(o=>{if(!o.file)return;const up=o.file.up||o.date;if(diff(T,up)>=33){add.push({id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:Object.assign({},o.file,{up}),at:T});const nm=o.file.name;o.file=null;touch(o,['вложение перенесено в корзину'],['file']);log('Вложение перенесено в корзину · '+supName(o.sup)+' · '+nm)}});
+  S.orders.forEach(o=>{const fl=ofl(o);if(!fl.length)return;const old=fl.filter(f=>diff(T,f.up||o.date)>=33);if(!old.length)return;old.forEach(f=>{add.push({id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:Object.assign({},f,{up:f.up||o.date}),at:T});log('Вложение перенесено в корзину · '+supName(o.sup)+' · '+f.name)});setFiles(o,fl.filter(f=>!old.includes(f)),['вложение перенесено в корзину'])});
   const del=S.settings.trash.filter(x=>diff(T,x.at)>=14).map(x=>x.id);
   if(add.length||del.length)listOp('trash',add,del)}
 
@@ -515,6 +515,8 @@ function orderRow(o){
   return `<div class="oc ${cls}" data-a="open" data-id="${o.id}"><div class="l1"><b>${esc(supName(o.sup))}</b><span class="amt">${o.file?svg('clip','ai'):''}${rub(o.amount)}</span></div>${o.comment?`<div class="cm">${esc(o.comment)}</div>`:''}
   <div class="l2"><span class="meta">${dm(o.date)} · ${pay}</span><button class="pill ${cls}" data-a="stPick" data-id="${o.id}" aria-haspopup="menu">${over?'Просрочен':stName[st]}</button></div></div>`}
 function touch(o,f,keys){touchObj('orders',o,keys||['ordered','paid'],{iso:new Date().toISOString(),f})}
+function ofl(o){return Array.isArray(o.files)&&o.files.length?o.files:(o.file?[o.file]:[])}
+function setFiles(o,fl,h){o.files=fl;o.file=fl[0]||null;touch(o,h,['file','files'])}
 function setFlag(o,k){
   if(k==='paid'){if(o.paid){o.paid=false;touch(o,['снята оплата'])}else{o.paid=true;o.ordered=true;touch(o,['оплачен'])}}
   else{if(o.paid){toast('Нельзя снять «Заказан», пока заказ оплачен');return}o.ordered=!o.ordered;touch(o,[o.ordered?'заказан':'снят «заказан»'])}}
@@ -722,8 +724,8 @@ function openOrder(id){
   ${sp?contactRow(sp):''}
   <dl class="kv"><dt>Сумма</dt><dd>${rub(o.amount)}</dd><dt>Дата заказа</dt><dd>${dl(o.date)}</dd><dt>Срок оплаты</dt><dd>${esc(termLab(o))}</dd><dt>Оплатить до</dt><dd>${dl(p)}${isOver(o)?` <span style="color:var(--over)">(просрочено ${diff(T,p)} дн.)</span>`:''}</dd>${o.comment?`<dt>Комментарий</dt><dd>${esc(o.comment)}</dd>`:''}</dl>
   <div class="seg3">${['prep','ord','paid'].map(k=>`<button class="pill ${k} ${stOf(o)===k?'on':''}" data-a="stSet" data-id="${o.id}" data-v="${k}">${stName[k]}</button>`).join('')}</div>
-  <h2>Вложение</h2>${o.file?`<div class="file"><span><button class="flk" data-a="fileView" data-id="${o.id}">${esc(o.file.name)}</button><br><small class="mute">в корзину через ${Math.max(0,33-diff(T,o.file.up||o.date))} дн.</small></span><button data-a="fileDel" data-id="${o.id}">Убрать</button></div>`:''}
-  <label class="btn quiet wide" style="margin-top:10px;cursor:pointer">${o.file?'Заменить файл':'Добавить файл'}<input type="file" id="addf" data-id="${o.id}" hidden></label>
+  <h2>${ofl(o).length>1?'Вложения':'Вложение'}</h2>${ofl(o).map((f,i)=>`<div class="file"><span><button class="flk" data-a="fileView" data-id="${o.id}" data-i="${i}">${esc(f.name)}</button><br><small class="mute">в корзину через ${Math.max(0,33-diff(T,f.up||o.date))} дн.</small></span><button data-a="fileDel" data-id="${o.id}" data-i="${i}">Убрать</button></div>`).join('')}
+  <label class="btn quiet wide" style="margin-top:10px;cursor:pointer">${o.file?'Добавить ещё файл':'Добавить файл'}<input type="file" id="addf" data-id="${o.id}" multiple hidden></label>
   <h2>История изменений</h2><ul class="hist">${o.hist.slice().reverse().map(h=>`<li>${ts(h.iso)} · ${esc(h.f.join(', '))}</li>`).join('')||'<li>Нет записей</li>'}</ul>
   <div class="bar" style="margin-top:18px"><button class="btn" data-a="editOrder" data-id="${o.id}">Изменить</button><button class="btn quiet" data-a="delOrder" data-id="${o.id}">Удалить</button><button class="btn quiet" data-a="close">Закрыть</button></div>`)}
 async function upload(file){
@@ -745,7 +747,7 @@ function orderForm(id){
   <div class="f"><span>Срок оплаты *</span>${pickF('f-term',termOpts(),tsel)}</div><label class="f" id="f-dw" hidden><span>Дата оплаты</span><input class="inp" type="date" id="f-date" value="${cdate}"></label>
   <div class="mute sm" style="margin-top:8px">Оплатить до: <b id="f-pd"></b></div>
   <label class="f"><span>Комментарий</span><textarea id="f-cm">${esc(o?.comment||'')}</textarea></label>
-  <div class="f"><span>Вложение</span><div class="fpick"><label class="btn quiet" id="fp-l"><span id="fp-n">Выберите файл</span><input type="file" id="f-files" hidden></label><button type="button" class="fx2" id="fp-x" data-a="fpClear" aria-label="Убрать выбор" hidden>✕</button></div></div>
+  <div class="f"><span>Вложение</span><div class="fpick"><label class="btn quiet" id="fp-l"><span id="fp-n">Выберите файлы</span><input type="file" id="f-files" multiple hidden></label><button type="button" class="fx2" id="fp-x" data-a="fpClear" aria-label="Убрать выбор" hidden>✕</button></div></div>
   ${o?'':`<button class="toggle solo" data-a="fchk" data-v="ord"><span>Сразу заказан</span><i class="sw" id="f-ord"></i></button><button class="toggle solo" data-a="fchk" data-v="paid" style="margin-top:8px"><span>Сразу оплачен</span><i class="sw" id="f-paid"></i></button>`}
   <div class="bar" style="margin-top:16px"><button class="btn quiet" data-a="close">Отмена</button><button class="btn on" id="f-save" data-a="saveOrder" data-id="${o?o.id:''}">${o?'Сохранить':'Создать'}</button></div><div id="f-err" style="color:var(--over);font-size:13px"></div>`);
   updPd()}
@@ -759,9 +761,9 @@ async function saveOrder(id){
   if(!sup)return err('Выберите поставщика');if(!od)return err('Укажите дату заказа');
   if(t.term==='custom'){if(!t.date)return err('Укажите дату оплаты');if(t.date<od)return err('Дата оплаты не может быть раньше даты заказа')}
   if(amt&&(isNaN(+amt)||+amt<0))return err('Сумма: только число');if(+amt>999999999)return err('Сумма не больше 999 999 999 ₽');
-  const a=amt?+amt:0,cm=$('#f-cm').value.trim(),fl=$('#f-files').files[0];
-  const btn=$('#f-save');btn.disabled=true;let file=null;
-  if(fl){try{file=await upload(fl)}catch(e){btn.disabled=false;return err('Файл не загрузился. Проверьте связь и попробуйте ещё раз')}}
+  const a=amt?+amt:0,cm=$('#f-cm').value.trim(),fls=[...$('#f-files').files];
+  const btn=$('#f-save');btn.disabled=true;const nf=[];
+  for(const fl of fls){try{nf.push(await upload(fl))}catch(e){btn.disabled=false;return err('Файл «'+fl.name+'» не загрузился. Проверьте связь и попробуйте ещё раз')}}
   const termF=t.term==='custom'?{term:'custom',days:t.days}:{term:t.term};
   if(id){
     const o=S.orders.find(x=>x.id===id),ch=[],keys=[];
@@ -770,13 +772,13 @@ async function saveOrder(id){
     if(o.date!==od){ch.push('дата заказа');keys.push('date')}
     if(pd(o)!==(t.term==='custom'?t.date:addD(od,termOf(t.term)?.days||0))||o.term!==termF.term){ch.push('срок оплаты');keys.push('term','days')}
     if(o.comment!==cm){ch.push('комментарий');keys.push('comment')}
-    if(file){ch.push('вложение');keys.push('file')}
-    Object.assign(o,{sup,amount:a,date:od,comment:cm});o.term=termF.term;if(termF.term==='custom')o.days=termF.days;else delete o.days;if(file)o.file=file;
+    if(nf.length){ch.push('вложение');keys.push('file','files')}
+    Object.assign(o,{sup,amount:a,date:od,comment:cm});o.term=termF.term;if(termF.term==='custom')o.days=termF.days;else delete o.days;if(nf.length){o.files=ofl(o).concat(nf);o.file=o.files[0]}
     if(ch.length){touch(o,ch,keys);log('Заказ изменён · '+supName(sup))}
     closeSheet();render();toast('Сохранено');
   }else{
     const paid=$('#f-paid').classList.contains('on'),ord=paid||$('#f-ord').classList.contains('on');
-    const o={id:nid(),sup,date:od,...termF,amount:a,ordered:ord,paid,file,comment:cm,hist:[{iso:new Date().toISOString(),f:['создан']}]};
+    const o={id:nid(),sup,date:od,...termF,amount:a,ordered:ord,paid,files:nf,file:nf[0]||null,comment:cm,hist:[{iso:new Date().toISOString(),f:['создан']}]};
     upsert('orders',o);log('Заказ создан · '+supName(sup)+' · '+rub(a));closeSheet();render();toast('Заказ создан')}}
 
 /* ---------- поставщик ---------- */
@@ -867,8 +869,8 @@ const A={
   newOrder:()=>orderForm(),editOrder:(v,d)=>orderForm(d.id),saveOrder:(v,d)=>saveOrder(d.id),
   fchk:(v,d,el)=>{const i=el.querySelector('.sw');i.classList.toggle('on');if(v==='paid'&&i.classList.contains('on'))$('#f-ord').classList.add('on');if(v==='ord'&&!i.classList.contains('on'))$('#f-paid').classList.remove('on')},
   delOrder:(v,d)=>askDel(()=>{const o=S.orders.find(x=>x.id===d.id);if(!o)return;remove('orders',o.id);log('Заказ удалён · '+supName(o.sup));render();toast('Заказ удалён')}),
-  fileDel:(v,d)=>ask('Убрать вложение в корзину?','В корзину',()=>{const o=S.orders.find(x=>x.id===d.id);if(!o||!o.file)return;const f=Object.assign({},o.file,{up:o.file.up||o.date});listOp('trash',[{id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:f,at:today()}]);o.file=null;touch(o,['вложение в корзине'],['file']);log('Вложение удалено · '+supName(o.sup)+' · '+f.name);openOrder(o.id);toast('Вложение в корзине на 14 дней')},{}),
-  fileView:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);if(o&&o.file)viewFile(o.file)},
+  fileDel:(v,d)=>ask('Убрать вложение в корзину?','В корзину',()=>{const o=S.orders.find(x=>x.id===d.id);if(!o)return;const fl=ofl(o),i=+d.i||0;if(!fl[i])return;const f=Object.assign({},fl[i],{up:fl[i].up||o.date});listOp('trash',[{id:nid(),kind:'file',oid:o.id,sup:supName(o.sup),file:f,at:today()}]);setFiles(o,fl.filter((x,j)=>j!==i),['вложение в корзине']);log('Вложение удалено · '+supName(o.sup)+' · '+f.name);openOrder(o.id);toast('Вложение в корзине на 14 дней')},{}),
+  fileView:(v,d)=>{const o=S.orders.find(x=>x.id===d.id);const f=o&&ofl(o)[+d.i||0];if(f)viewFile(f)},
   trView:(v,d)=>{const i=S.settings.trash.find(x=>x.id===d.id);if(i)viewFile(i.file)},
   vclose:()=>closeViewer(),
   vopen:(v,d)=>openExt(d.u),
@@ -895,7 +897,7 @@ const A={
   usDel:(v,d)=>{const u=S.settings.users.find(x=>x.id===d.id);if(!u)return;askDel(()=>{listOp('users',[],[u.id]);log('Доступ удалён · '+fmtUser(u));render()})},
   smPrev:()=>{const m=ui.sm||today().slice(0,7);const d=new Date(+m.slice(0,4),+m.slice(5,7)-2,1);ui.sm=fD(d).slice(0,7);render()},
   smNext:()=>{const cur=today().slice(0,7),m=ui.sm||cur;if(m>=cur)return;const d=new Date(+m.slice(0,4),+m.slice(5,7),1);ui.sm=fD(d).slice(0,7);render()},
-  fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файл';$('#fp-x').hidden=true},
+  fpClear:()=>{const i=$('#f-files');i.value='';$('#fp-n').textContent='Выберите файлы';$('#fp-x').hidden=true},
   maxDlg:(v,d)=>showMaxDlg(d.p),
   maxLink:(v,d)=>openExt(d.u),
   maxGo:(v,d)=>openMax(d.p),numCopy:(v,d)=>copyNum(d.p),extGo:(v,d)=>{/^https?:\/\/(t|telegram)\.me\//i.test(d.u)?openTg(d.u):openExt(d.u)},
@@ -921,8 +923,8 @@ const A={
   remDel:(v,d)=>askDel(()=>{remove('rems',d.id);log('Напоминание удалено');render()}),
   ntog:v=>{setSettings({[v]:!S.settings[v]});render()},
   trRestore:(v,d)=>{const i=S.settings.trash.find(x=>x.id===d.id);if(!i)return;const o=S.orders.find(x=>x.id===i.oid);
-    if(!o)return toast('Заказа больше нет, вернуть некуда');if(o.file)return toast('У заказа уже есть вложение');
-    o.file=Object.assign({},i.file,{up:today()});listOp('trash',[],[i.id]);touch(o,['вложение возвращено'],['file']);log('Вложение возвращено · '+supName(o.sup)+' · '+i.file.name);render();toast('Вложение возвращено')},
+    if(!o)return toast('Заказа больше нет, вернуть некуда');
+    listOp('trash',[],[i.id]);setFiles(o,ofl(o).concat([Object.assign({},i.file,{up:today()})]),['вложение возвращено']);log('Вложение возвращено · '+supName(o.sup)+' · '+i.file.name);render();toast('Вложение возвращено')},
   trKill:(v,d)=>askDel(()=>{listOp('trash',[],[d.id]);log('Вложение удалено из корзины');render()}),
   trClear:()=>askDel(()=>{listOp('trash',[],S.settings.trash.map(x=>x.id));log('Корзина очищена');render()}),
   logMore:()=>{ui.logn+=50;$('#ll').innerHTML=logList()}
@@ -959,12 +961,12 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='s-tg'){t.value=normTg(t.value);return}
   if(t.id==='s-wa'){t.value=normWa(t.value);return}
   if(t.id==='s-mx'){t.value=normMax(t.value);return}
-  if(t.id==='f-files'){const f=t.files[0];$('#fp-n').textContent=f?f.name:'Выберите файл';$('#fp-x').hidden=!f;return}
+  if(t.id==='f-files'){const n=t.files.length;$('#fp-n').textContent=n>1?'Файлов: '+n:n?t.files[0].name:'Выберите файлы';$('#fp-x').hidden=!n;return}
   if(t.id==='botfile'&&t.files[0]){botPhoto(t.files[0]);t.value='';return}
   if(t.id==='wpfile'&&t.files[0]){wpPrep(t.files[0]).then(async d=>{WP=d;UI.wpOff=false;lsSet('zakazy-ui',UI);const ok=await wpSave(d);applyWp();wpLum();toast(ok?'Обои установлены':'Обои установлены до закрытия, сохранить не удалось')}).catch(()=>toast('Не удалось открыть фото'));t.value='';return}
   if(t.id==='hjump'&&t.value){ui.calPicked=false;ui.home.cur=t.value;ui.home.per='';render()}
   else if(t.id==='cjump'&&t.value){ui.calPicked=true;ui.cal.cur=t.value;ui.cal.sel=t.value;render()}
-  else if(t.id==='addf'&&t.files[0]){const o=S.orders.find(x=>x.id===t.dataset.id);toast('Загрузка…');upload(t.files[0]).then(f=>{o.file=f;touch(o,['вложение'],['file']);log('Вложение добавлено · '+supName(o.sup)+' · '+f.name);openOrder(o.id);toast('Файл добавлен')}).catch(()=>toast('Файл не загрузился'))}});
+  else if(t.id==='addf'&&t.files.length){const o=S.orders.find(x=>x.id===t.dataset.id),fs=[...t.files];toast('Загрузка…');(async()=>{const nf=[];for(const fl of fs){try{nf.push(await upload(fl))}catch(e){toast('Файл «'+fl.name+'» не загрузился')}}if(!nf.length)return;setFiles(o,ofl(o).concat(nf),['вложение']);nf.forEach(f=>log('Вложение добавлено · '+supName(o.sup)+' · '+f.name));openOrder(o.id);toast(nf.length>1?'Файлы добавлены':'Файл добавлен')})()}});
 const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('zakazy-wp',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
 const idbDo=(mode,fn)=>idb().then(db=>new Promise((res,rej)=>{const t=db.transaction('k',mode),r=fn(t.objectStore('k'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej()}));
 async function wpSave(d,key='wp'){try{await idbDo('readwrite',o=>o.put(d,key));try{localStorage.removeItem('zakazy-'+key)}catch(e){}return true}catch(e){try{localStorage.setItem('zakazy-'+key,d);return true}catch(x){return false}}}
