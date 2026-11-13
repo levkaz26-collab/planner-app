@@ -1034,7 +1034,7 @@ async function openViewer(f){const v=$('#viewer'),box=$('#vbox'),bar=$('#vbar'),
   if(!url){box.innerHTML='<div class="vmsg">Файл недоступен</div>';return}
   const noPrev=()=>{if(!v.hidden)box.innerHTML='<button class="btn on" data-a="vopen" data-u="'+esc(url)+'">Открыть вложение</button>'};
   try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),5000);const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw 0;const b=await r.blob();clearTimeout(tm);if(v.hidden)return;const ty=f.type||b.type||'';vURL=URL.createObjectURL(b);
-    box.innerHTML=/^image\//.test(ty)||/\.(jpe?g|png|gif|webp)$/i.test(f.name)?'<img src="'+vURL+'" alt="">':(/pdf/.test(ty)||/\.pdf$/i.test(f.name))?'<iframe src="'+vURL+'" title=""></iframe>':'<div class="vmsg">Предпросмотр недоступен</div>'}
+    box.innerHTML=/^image\//.test(ty)||/\.(jpe?g|png|gif|webp)$/i.test(f.name)?'<img src="'+vURL+'" alt="">':(/pdf/.test(ty)||/\.pdf$/i.test(f.name))?'<iframe src="'+vURL+'" title=""></iframe>':'<div class="vmsg">Таблицу или документ здесь не показать</div><button class="btn on" data-a="vopen" data-u="'+esc(url)+'">Открыть вложение</button>'}
   catch(e){noPrev()}}
 function closeViewer(){$('#viewer').hidden=true;$('#vbox').innerHTML='';if(vURL){URL.revokeObjectURL(vURL);vURL=null}if($('#sheet').hidden)document.body.classList.remove('lock')}
 let DR=null;
